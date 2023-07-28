@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Welcoming page</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            user-select: none;
+            font-family: "Trebuchet MS", serif;
+        }
+
+        body {
+            width: 100vw;
+            min-height: 100vh;
+            background-color: #262626;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-evenly;
+            overflow-x: hidden;
+            color: white;
+        }
+
+        .bottom-svg {
+            margin-top: 50px;
+            transform: scaleY(-100%);
+            color: #479a47;
+        }
+
+        .welcome {
+            width: fit-content;
+        }
+
+        h1 {
+            font-size: 2rem;
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        .welcome-section p, .listing-section p {
+            font-size: 1.4rem;
+            text-align: center;
+        }
+
+        .fader {
+            opacity: 0;
+            transform: translateX(-10%);
+            filter: blur(5px);
+            transition: filter 1s ease-out, transform 1s ease-out, opacity 1s ease-out;
+        }
+
+        .fader.show {
+            opacity: 1;
+            filter: blur(0);
+            transform: translateX(0%);
+        }
+
+        body .welcome-section:first-child p {
+            color: #479a47;
+        }
+
+        .welcome-section {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            row-gap: 10px;
+        }
+
+        .welcome-section .description {
+            color: #479a47;
+        }
+
+        .listing-section {
+            border: solid #479a47;
+            border-width: 3px 0 3px 0;
+            width: 100%;
+        }
+
+        .list-item {
+            min-height: 100px;
+            position: relative;
+            width: 100vw;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .list-item p {
+            padding: 0 10px;
+        }
+
+        .list-item .vertical-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 3rem;
+            width: 3px;
+            background-color: #479a47;
+        }
+
+        .list-item .vertical-line::after {
+            content: '';
+            position: absolute;
+            height: 3px;
+            width: 10rem;
+            top: 50%;
+            background: linear-gradient(90deg, #479a47, transparent);
+        }
+
+        .delayed-fader {
+            transition-delay: var(--delay-time);
+        }
+
+        .last-section {
+            background: linear-gradient(180deg, transparent, #479a47);
+            width: 100%;
+            margin-bottom: -1px;
+        }
+
+        .last-section p {
+            color: white;
+        }
+
+        footer {
+            min-height: 200px !important;
+            margin-top: 100px;
+            margin-bottom: 100px;
+        }
+
+        a {
+            color: #8ecb8e;
+            cursor: pointer !important;
+        }
+
+        @media (prefers-reduced-motion) {
+            .fader {
+                transition: none;
+            }
+        }
+
+        @media (max-width: 880px) {
+            .list-item .vertical-line {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1366.64 211.49">
+    <defs><style>.cls-1{fill:#1a1a1a;stroke: transparent;stroke-miterlimit:10;}</style></defs>
+    <path class="cls-1" d="M-.07,173.29c78.8,0,187.88-78.58,297-81.43s138.49,104.28,250,104.28,242.66-85.71,376.24-85.71,95.6,102.86,235.31,100,207.12-59.29,207.12-59.29V0H-.07Z" transform="translate(0.57 0.5)"/>
+</svg>
+<section class="welcome-section">
+    <h1 class="welcome fader">Welcome to a website made to react to your scroll ;)</h1>
+    <p class="description fader delayed-fader" style="--delay-time: .5s;">
+        this isn't an actual website made for production
+        <br>
+        but to showcase how you can make different effects appear on scroll.
+        <br>
+        you can read the documentation on these tricks used in this website
+        <br>
+        at the end of the webpage
+    </p>
+    <p class="description fader delayed-fader" style="--delay-time: .5s; font-size: 2rem;">
+        this website mainly uses the <br>
+        Intersection Observer
+    </p>
+</section>
+<section class="welcome-section">
+    <h1 class="welcome fader">here you get to read more about it</h1>
+    <p class="description fader delayed-fader" style="--delay-time: .5s;">scroll down to see the animations as they fade into the view
+        <br>
+        doesn't it look magical?!
+    </p>
+</section>
+<section class="welcome-section">
+    <h1 class="welcome fader">you can also make the animations have some delay to unfold</h1>
+    <p class="description fader delayed-fader" style="--delay-time: .5s;">the below list slowly uncovers itself<br>
+        one by one ... slow and steady
+    </p>
+</section>
+<section class="welcome-section">
+    <h1 class="welcome fader color-changer">you can also make things react to the scroll of the page</h1>
+    <p class="color-changer fader">look at me changing color!</p>
+    <p class="description fader delayed-fader" style="--delay-time: .5s;">look at the color of this text changing <br>
+        as you scroll down! this one requires some javascript though ... so ¯\_(ツ)_/¯
+        <br>
+        one by one ... slow and steady
+    </p>
+</section>
+<section class="listing-section">
+    <div class="list-item fader once-fader delayed-fader" style="--delay-time: .5s;">
+        <div class="vertical-line"></div>
+        <p class="list-text">number one is cool</p>
+    </div>
+    <div class="list-item fader once-fader delayed-fader" style="--delay-time: .5s;">
+        <div class="vertical-line"></div>
+        <p class="list-text">number two is cooler</p>
+    </div>
+    <div class="list-item fader once-fader delayed-fader" style="--delay-time: .5s;">
+        <div class="vertical-line"></div>
+        <p class="list-text">number three is even cooler</p>
+    </div>
+    <div class="list-item fader once-fader delayed-fader" style="--delay-time: .5s;">
+        <div class="vertical-line"></div>
+        <p class="list-text">number four is the coolest as it can get</p>
+    </div>
+</section>
+<section class="welcome-section last-section">
+    <h1 class="welcome fader">Want to learn about this feature?</h1>
+    <p class="fader delayed-fader" style="--delay-time: 1s;">see my documentation or <br>
+        or the one created by someone else in the community ;)<br>
+        links:
+        <a href="/sample-projects/fadein-effect-tutorial.ejs">[ see mine ]</a>
+        <a href="">[ community says ]</a>
+    </p>
+</section>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1366.64 211.49">
+    <defs><style>.cls-1{fill: #479a47;stroke: transparent;stroke-miterlimit:10;}</style></defs>
+    <path class="cls-1" d="M-.07,173.29c78.8,0,187.88-78.58,297-81.43s138.49,104.28,250,104.28,242.66-85.71,376.24-85.71,95.6,102.86,235.31,100,207.12-59.29,207.12-59.29V0H-.07Z" transform="translate(0.57 0.5)"/>
+</svg>
+<footer class="welcome-section">
+    <h1 class="welcome fader">rights:</h1>
+    <p class="description fader delayed-fader" style="--delay-time: 1s;">there is no rights or terms or services ...<br>
+        just really wanted to add this cool section ;)<br>
+        I mean, isn't it awesome <br>
+        (～￣▽￣)～
+    </p>
+    <p class="description fader delayed-fader" style="--delay-time: 1.2s;"><a href="/sample-projects">!back!</a></p>
+</footer>
+<svg class="bottom-svg" id="Layer_3" data-name="Layer 3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1365.57 430.14"><defs><style>.cls-1{fill: #479a47;}</style></defs><path class="cls-1" d="M0,430.14c181.57,0,324.17-183.43,604.54-188.57S860.86,416.43,1090,414.71s275.57-132,275.57-132V0H0Z" transform="translate(0.03)"/></svg>
+
+<script>
+    const fadein_intersect = new IntersectionObserver((entries)=>{
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('show');
+            } else if (![...entry.target.classList].includes('once-fader')){
+                entry.target.classList.remove('show');
+            }
+        });
+    });
+
+    const faders = document.querySelectorAll('.fader');
+    faders.forEach(fader => {
+        fadein_intersect.observe(fader);
+    });
+</script>
+
+<script defer>
+    const color_changing_texts = document.querySelectorAll('.color-changer');
+    window.addEventListener("scroll", ()=> {
+        color_changing_texts.forEach(element => {
+            console.log(window.scrollY)
+            element.style.color = `hsl(${window.scrollY*0.2}, 50%, 50%)`;
+        });
+    });
+</script>
+</body>
+</html>

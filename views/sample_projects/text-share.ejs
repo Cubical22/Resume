@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>text share web</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        header {
+            background-color: rgb(61, 61, 61);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-evenly;
+            row-gap: 10px;
+            padding: 20px 0;
+            color: white;
+            cursor: default;
+            user-select: none;
+            text-align: center;
+        }
+
+        .input-section {
+            background-color: rgb(116, 116, 116);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            column-gap: 10px;
+            padding: 10px;
+        }
+
+        .share-text-input {
+            flex: 1;
+            max-width: 400px;
+            height: 30px;
+            padding: 0 10px;
+            border-radius: 5px;
+            border: 1px solid rgb(61, 61, 61);
+            outline: none;
+            direction: rtl;
+        }
+
+        .input-section button {
+            background-color: rgb(61, 61, 61);
+            color: white;
+            height: 30px;
+            width: 50px;
+            border: 1px solid black;
+            transition: box-shadow .14s;
+        }
+
+        .input-section button:hover {
+            box-shadow: 0 0 10px rgb(61, 61, 61);
+            cursor: pointer;
+        }
+
+        .texts-list {
+            padding: 10px;
+            row-gap: 10px;
+            column-gap: 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .text {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background-color: rgb(116, 116, 116);
+            color: white;
+            padding: 20px;
+            border: 1px solid black;
+        }
+        
+        @media (max-width: 740px) {
+            .texts-list {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 460px) {
+            .texts-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .back-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            aspect-ratio: 1/1;
+            background-color: rgb(116, 116, 116);
+            color: white;
+            border: 1px solid black;
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            text-decoration: none;
+        }
+    </style>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <header>
+        <h1>می خوای یه جمله با بقیه به اشتراک بگزاری؟</h1>
+        <p>هر جمله ای که دوست داری رو با رعایت ادب و ملاحظه با بقیه اینجا به اشتراک بگزار تا بقیه ببینن</p>
+        <p>حواست به اشتراک گذاشتن اطلاعات حساس و مهم و ناراحت کردن دیگران باشه</p>
+    </header>
+    <section class="input-section">
+      <label>
+        <input type="text" class="share-text-input">
+      </label>
+      <button class="send-button">ارسال</button>
+    </section>
+    <section class="texts-list">
+    </section>
+    <a href="/sample-projects" class="back-button"><</a>
+
+    <!-- this script handles the socket connection to recieve and send text over to the server-->
+    <script>
+        const socket = io();
+        const list_element = document.querySelector(".texts-list");
+        const children = [];
+
+        socket.on("connect",()=>{
+            socket.emit("send-text-share-text-list", recieved_text_list);
+        });
+
+        function recieved_text_list(texts) {
+            for (let i = texts.length - 1; i >= 0; i--) {
+                const div = document.createElement("div");
+                div.textContent = texts[i];
+                div.classList.add("text");
+                list_element.appendChild(div);
+                children.push(div);
+            }
+        }
+
+        const send_button = document.querySelector(".send-button");
+        const input = document.querySelector(".share-text-input")
+
+        send_button.addEventListener("click", ()=>{
+            socket.emit("recieve-text-share-text-input", input.value, (texts)=>{
+                reload_text_list(texts);
+                input.value = "";
+            });
+        });
+
+        function reload_text_list(texts) {
+            children.forEach(child => {
+                list_element.removeChild(child);
+            });
+            children.splice(0,children.length);
+
+            recieved_text_list(texts);
+        }
+    </script>
+</body>
+</html>

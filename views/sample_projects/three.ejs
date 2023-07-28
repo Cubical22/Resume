@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three js try</title>
+    <style>
+        :root {
+            --bright-cyan: rgb(54, 118, 238);
+            --dark-cyan: rgb(46, 99, 197);
+            --darker-cyan: rgb(34, 75, 151);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+        .bg {
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .back-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            aspect-ratio: 1/1;
+            background: linear-gradient(90deg, var(--bright-cyan), var(--darker-cyan));
+            color: white;
+            border: 1px solid black;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            text-decoration: none;
+        }
+
+        .speed-control {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <a href="/sample-projects" class="back-button"><</a>
+    <canvas class="bg"></canvas>
+    <label>
+      <input type="range" min="0.07" max="10" step="0.01" value="0.1" class="speed-control">
+    </label>
+
+    <script src="/libraries/three.min.js"></script>
+    <script>
+        const canvas = document.querySelector('.bg');
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight, 0.1,1000);
+
+        const renderer = new THREE.WebGLRenderer({
+            canvas: canvas
+        });
+
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.position.setZ(30);
+
+        const torus = new THREE.Mesh(
+            new THREE.TorusGeometry(10,5,50,400),
+            new THREE.MeshStandardMaterial({color: 0xFF8837})
+        );
+        scene.add(torus);
+
+
+        const ambientlight = new THREE.AmbientLight({r: .5, b:.6, g: .6});
+        scene.add(ambientlight);
+
+        const pointlight = new THREE.PointLight({r: 0.6, g: 0.6, b: 0.6});
+        pointlight.position.set(5,10,10);
+        scene.add(pointlight);
+
+        function addStars() {
+            const geometry = new THREE.BoxGeometry(1,1,1);
+            const material = new THREE.MeshStandardMaterial({color: 0xf000});
+            const star = new THREE.Mesh(geometry, material);
+
+            const x = (Math.random() - 0.5) * 200;
+            const y = (Math.random() - 0.5) * 200;
+            const z = (Math.random() - 0.5) * 200;
+
+            star.position.set(x,y,z);
+            star.rotation.set(x,y,z);
+            scene.add(star);
+
+            return star;
+        }
+
+        const stars = [];
+
+        for (let i = 0; i < 200; i++) {
+            stars.push(addStars());
+        }
+
+        //*************************************
+        const input = document.querySelector(".speed-control");
+        let changing = false;
+        input.addEventListener("mousedown", ()=>{
+            changing = true;
+        });
+        input.addEventListener("touchstart", ()=>{
+            changing = true;
+        });
+
+        input.addEventListener("mouseup", ()=>{
+            changing = false;
+        });
+        input.addEventListener("touchend", ()=>{
+            changing = false;
+        });
+        //*************************************
+
+        let material_value = 0;
+        let star_movement_speed = 0.1; 
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (changing) {
+                star_movement_speed = JSON.parse(input.value);
+            }
+
+            material_value += star_movement_speed/10;
+
+            const color = {
+                r: Math.sin(material_value),
+                g: Math.sin(material_value + 10),
+                b: Math.sin(material_value + 20)
+            };
+
+            torus.material.color = color;
+
+            torus.rotation.x = Math.sin(material_value/10 + 10);
+            torus.rotation.y += star_movement_speed/10;
+            torus.rotation.z += star_movement_speed/10;
+
+            torus.scale.x = Math.sin(material_value*5)/10 + 0.5;
+            torus.scale.y = Math.sin(material_value*5)/10 + 0.5;
+            torus.scale.z = Math.sin(material_value*5)/10 + 0.5;
+
+            stars.forEach(star => {
+                star.material.color = color;
+                star.position.x += star_movement_speed;
+                if (star.position.x > 100) {
+                    star.position.x = -100;
+                }
+            });
+
+            renderer.render(scene,camera);
+        } animate();
+    </script>
+</body>
+</html>

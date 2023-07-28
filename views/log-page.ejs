@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <style>
+    :root {
+      --bright-cyan: rgb(54, 118, 238);
+      --dark-cyan: rgb(46, 99, 197);
+      --darker-cyan: rgb(34, 75, 151);
+    }
+
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Helvetica Neue", fantasy;
+    }
+
+    body {
+      height: 100vh;
+      background: linear-gradient(0deg, #8d2727, pink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    h1 {
+      text-align: center;
+      width: 70%;
+    }
+
+    p {
+      position: fixed;
+      top: 30px; left: 50%;
+      transform: translateX(-50%);
+      font-size: 30px;
+    }
+  </style>
+</head>
+<body>
+  <p>warning log received</p>
+  <h1><%= msg %></h1>
+</body>
+</html>

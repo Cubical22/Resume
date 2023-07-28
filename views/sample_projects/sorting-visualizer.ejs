@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>sorting visualizer sample project</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: #101010;
+        }
+
+        .return-button {
+            background: gray;
+            display: flex;
+            align-items: center;
+            justify-content: space-evenly;
+            height: 30px;
+            aspect-ratio: 1/1;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            border: 1px solid black;
+            color: white;
+            text-decoration: none;
+        }
+
+        #container {
+            display: flex;
+            height: 90vh;
+            width: 90vw;
+            align-items: flex-end;
+            justify-content: space-evenly;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .bar {
+            flex: 1;
+            box-shadow: 0 0 30px rgba(65, 213, 83, 0.51);
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-evenly;
+            position: fixed;
+            column-gap: 10px;
+            top: 10px;
+            left: 50px;
+            height: 30px;
+            aspect-ratio: 3/1;
+        }
+
+        .actions button:first-child {
+            width: 30px;
+            aspect-ratio: 1/1;
+        }
+
+        .actions button:last-child {
+            height: 100%;
+            flex: 1;
+        }
+
+        .options {
+            position: fixed;
+            background: white;
+            top: 50px;
+            left: 10px;
+            height: 100px;
+            width: 130px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .options div {
+            width: 100%;
+        }
+
+        .options div input {
+            width: 100%;
+        }
+
+        .options label {
+            margin-right: 10px;
+        }
+
+        @media (max-width: 710px) {
+            #container {
+                height: 60vw;
+            }
+        }
+    </style>
+</head>
+<body>
+<a href="/sample-projects" class="return-button"><</a>
+<div id="container"></div>
+
+<div class="actions">
+    <button onclick="init()">init</button>
+    <button onclick="play()">play</button>
+</div>
+<div class="options">
+    <div>
+        <label for="sounds">sounds:</label>
+        <input type="button" name="sounds" id="sounds" value="toggle">
+    </div>
+    <div>
+        <label for="count">count:</label>
+        <input type="number" name="count" id="count" value="100">
+        <input type="button" value="apply" onclick="apply_bars()">
+    </div>
+</div>
+<script>
+    let count = 100;
+    const array = [];
+    const delay = 1;
+    let playing = false;
+    let play_sounds = true;
+
+    init();
+
+    let audioC = null;
+    function play_freq(freq) {
+        if (audioC === null) {
+            audioC = new(AudioContext || webkitAudioContext || window.webkitAudioContext)();
+        }
+        if (!play_sounds) return;
+        const dur = 0.1;
+        const osc = audioC.createOscillator();
+        osc.frequency.value = freq;
+        osc.start();
+        osc.stop(audioC.currentTime+dur);
+
+        const node = audioC.createGain();
+        node.gain.value = 0.02;
+        node.gain.linearRampToValueAtTime(0 , audioC.currentTime+dur);
+        osc.connect(node);
+        node.connect(audioC.destination);
+    }
+
+    function remove_all_bars() {
+        container.innerHTML = "";
+    }
+
+    function init() {
+        if (playing) return;
+        remove_all_bars();
+        for (let i = 0; i < count; i++) {
+            array[i] = Math.random();
+        }
+        show_bars();
+    }
+
+    function play() {
+        if (playing) return;
+        playing = true;
+        const copy = [...array]
+        remove_all_bars();
+        const swaps = bubble_sort(copy);
+        //show_bars();
+        animate_swaps(swaps);
+    }
+
+    function animate_swaps(swaps) {
+        if (swaps.length === 0) {
+            show_bars();
+            playing = false;
+            return false;
+        }
+        const move = swaps.shift();
+        const [i, j] = move.indices;
+        if (move.type === 'swap') {
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        play_freq(200 + array[i]*500)
+        play_freq(200 + array[j]*500)
+        show_bars(move);
+        setTimeout(function () {
+            animate_swaps(swaps);
+        }, delay);
+    }
+
+    function bubble_sort(array) {
+        const moves = [];
+        do {
+            var swapped = false;
+            for (let i = 1; i < array.length; i++) {
+                moves.push({indices: [i-1, i], type: "comp"});
+                if (array[i-1] > array[i]) {
+                    swapped = true;
+                    moves.push({indices: [i-1, i], type: "swap"});
+                    [array[i-1], array[i]] = [array[i], array[i-1]];
+                }
+            }
+        } while (swapped);
+        return moves;
+    }
+
+    function show_bars(move) {
+        remove_all_bars();
+        for (let i = 0; i < array.length; i++) {
+            const bar = document.createElement("div");
+            bar.style.height = array[i]*100 + "%";
+            bar.style.backgroundColor = `rgb(${255 - array[i]*255}, 210, ${20 + array[i]*200})`;
+            bar.classList.add("bar");
+
+            if (move && move.indices.includes(i)) {
+                bar.style.backgroundColor = move.type === 'swap' ? 'red': "blue";
+            }
+            container.appendChild(bar);
+        }
+    }
+
+    document.querySelector("#sounds").addEventListener("click", (e)=>{
+        play_sounds = !play_sounds;
+    });
+
+    function apply_bars() {
+        if (playing) return;
+        count = JSON.parse(document.querySelector("#count").value);
+        console.log(count);
+        remove_all_bars();
+        array.splice(0, array.length);
+        init();
+        show_bars();
+    }
+</script>
+</body>
+</html>

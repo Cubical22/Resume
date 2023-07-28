@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0">
+  <title>Send us a massage directly :)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bg-image {
+      --push-in: -7px;
+      position: fixed;
+      top: var(--push-in);
+      left: var(--push-in);
+      width: calc(100% + var(--push-in) * (-2));
+      height: calc(100% + var(--push-in) * (-2));
+      object-fit: cover;
+      z-index: -10;
+    }
+
+    form {
+      display: inline;
+    }
+
+    .main-holder {
+      min-height: 100vh;
+      max-width: 700px;
+      width: 100vw;
+      min-width: 340px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(33, 33, 33, 0.46);
+      box-shadow:  0 0 20px rgba(108, 67, 169, 0.82);
+
+      padding-top: 30px;
+    }
+
+    @media (max-width: 700px) {
+      .main-holder {
+        min-width: 100vw;
+      }
+    }
+
+    .upper-info-section {
+      height: fit-content;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: inherit;
+      justify-content: space-evenly;
+      row-gap: 10px;
+      text-align: center;
+      color: white;
+      padding: 0 10px;
+    }
+
+    .upper-info-section h1 {
+      font-size: 40px;
+    }
+
+    .upper-info-section p {
+      font-size: 20px;
+      direction: rtl;
+    }
+
+    .lower-form-holder {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+      padding: 0 20px;
+    }
+
+    .lower-form-holder label {
+      direction: rtl;
+      color: white;
+    }
+
+    .submit-button {
+      cursor: pointer;
+    }
+
+    .lower-form-holder input {
+      border-radius: 50vh;
+      height: 30px;
+      padding: 0 10px;
+    }
+
+    .lower-form-holder textarea, .lower-form-holder input {
+      background: rgba(137, 116, 187, 0.31);
+      border: 1px solid black;
+      color: white;
+      direction: rtl;
+      outline: none;
+    }
+
+    .lower-form-holder textarea {
+      max-width: 100%;
+      min-width: 100%;
+      min-height: 100px;
+      max-height: 200px;
+      height: 200px;
+      padding: 10px;
+    }
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      margin: 0;
+    }
+
+    a {
+      background: white;
+      padding: 5px 10px;
+      text-decoration: none;
+      color: black;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <img src="/src/images/send-massage-bg.png" alt="..." class="bg-image">
+  <form action="/utils/send" method="post">
+    <section class="main-holder">
+      <div class="upper-info-section">
+        <h1>با ما در ارتبط باشید</h1>
+        <p>از طریق این فرم یا از طریق راه های ارتباطی ذکر شده در صفحه ی اصلی، با ما در ارتباط باشید</p>
+        <p>برای استفاده از فرم، لطفا اطلاعات مذکور را پر کرده و سپس روی ارسال کلیک کنید و منتظر تماس ما باشید</p>
+        <a href="/">بازگشت</a>
+        <!-- this par is used to display error-massages, if there is any of course-->
+        <p><%= error_massage %></p>
+      </div>
+      <div class="lower-form-holder">
+        <label for="name">کمپانی/ نام و نام خانوادگی</label>
+        <input type="text" name="name" id="name" placeholder="" required>
+        <label for="phone_number">شماره ی تماس</label>
+        <input type="number" name="phone_number" id="phone_number" placeholder="" required>
+        <label for="description">شرح درخواست</label>
+        <textarea name="description" id="description" required></textarea>
+        <input type="submit" value="ارسال" class="submit-button">
+      </div>
+    </section>
+  </form>
+</body>
+</html>

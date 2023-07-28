@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>path finder sample-project</title>
+    <style>
+        * {
+            user-select: none;
+        }
+
+        body{
+            margin:0;
+            overflow: hidden;
+            background-color: rgb(129, 129, 129);
+        }
+
+        .canvas-holder {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            align-items:center;
+            justify-content: center;
+        }
+
+        #main {
+            width: 100%;
+            height: 100%;
+            object-fit:contain;
+        }
+
+        .toolbar-button {
+            position: fixed;
+            left: 10px;
+            bottom: 10px;
+            width: 30px;
+            aspect-ratio:1/1;
+        }
+
+        .return-button {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            width: 30px;
+            aspect-ratio: 1/1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        #toolBar {
+            position: fixed;
+            display: none;
+            flex-direction: column;
+            background-color: rgb(54, 54, 54);
+            padding: 10px;
+            width: 140px;
+            right: 0;
+            top: 0;
+            bottom: 0;
+        }
+
+        p {
+            color: white;
+            text-align: center;
+            margin-top: 0;
+        }
+
+        button, a {
+            background-color: rgb(156, 50, 255);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+            outline: none;
+        }
+
+        button:hover, a:hover {
+            background-color: rgb(117, 38, 190);
+        }
+
+        #checkbox-holder {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        #checkbox-holder p {
+            margin: auto 0;
+            flex: 1;
+        }
+
+        #vertical-holder {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #spaceMaker {
+            margin-bottom: 5px;
+        }
+
+        input {
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="canvas-holder">
+        <canvas id="main"></canvas>
+    </div>
+    <div id="toolBar">
+        <p>remove all the walls</p>
+        <button id="clearButton">clear the canvas (c)</button>
+        <p>start the visualization</p>
+        <button id="visualize">visualize (r)</button>
+        <div id="checkbox-holder">
+            <p>do diagenals</p>
+            <label for="diagenals"></label><input type="checkbox" id="diagenals">
+        </div>
+        <div id="checkbox-holder">
+            <p>borders</p>
+            <label for="showBorders"></label><input type="checkbox" id="showBorders">
+        </div>
+        <button style="margin-top: 10px;" id="resetButton">reset path (x)</button>
+        <div id="vertical-holder">
+            <p style="margin-bottom: 3px;">testing envirements<br><span style="font-size: 12px;">(could be impossible)</span></p>
+            <button id="chamber-random-blocks">random blocks</button>
+            <div id="spaceMaker"></div>
+            <button id="chamber-random-shapes">shapes</button>
+            <div id="spaceMaker"></div>
+            <button id="chmaber-random-hole">random col</button>
+        </div>
+        <div id="vertical-holder">
+            <p style="margin-bottom: 5px;">toggle sounds:</p>
+            <button onclick="should_play_sounds = !should_play_sounds;" style="margin-bottom: 10px">toggle</button>
+        </div>
+        <p>made by<br>Amir Hossain Oroujlou
+        </p>
+    </div>
+    <button class="toolbar-button">+</button>
+    <a class="return-button" href="/sample-projects"><</a>
+
+    <!-- this script is used to play notes and sounds as wished -->
+    <script>
+        let audioC = undefined;
+        let should_play_sounds = true;
+
+        function play_note(freq, type) {
+            if (audioC === undefined) {
+                audioC = new (AudioContext || window.AudioContext || webkitAudioContext || window.webkitAudioContext)();
+            }
+
+            if (!should_play_sounds)
+                return;
+
+            const dur = .2;
+
+            const osc = audioC.createOscillator();
+            osc.frequency.value = freq;
+            osc.start();
+            osc.type = type;
+            osc.stop(audioC.currentTime+dur)
+            const node = audioC.createGain()
+            node.gain.value = .4;
+            node.gain.linearRampToValueAtTime(0, audioC.currentTime + dur);
+            osc.connect(node);
+            node.connect(audioC.destination);
+        }
+    </script>
+
+    <!-- this script holds the class that handles the forming blocks (for animation) -->
+    <script> 
+        class formingCell {
+            constructor(x,y,color,speed,parentCell) {
+                this.size = 0;
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.speed = speed;
+                this.sizeLimit = canvas.height/count;
+                this.parentCell = parentCell;
+                this.remove = false;
+            }
+
+            draw() {
+                c.beginPath();
+                c.fillStyle = this.color;
+                var middleX = this.x + this.sizeLimit/2;
+                var middleY = this.y + this.sizeLimit/2;
+                c.rect(middleX - this.size/2, middleY - this.size/2,this.size,this.size);
+                c.fill();
+                c.closePath();
+            }
+
+            update() {
+                if (this.size < this.sizeLimit - 3) {
+                    this.size += this.speed;
+                } else {
+                    this.remove = true;
+                    this.parentCell.show = true;
+                    if (this.parentCell.isPath) {
+                        this.parentCell.pathShow = true;
+                        play_note(200,'sine');
+                    }
+                }
+            }
+        }
+
+        class FaddingCell {
+            constructor(x,y,color,speed) {
+                this.x = x;
+                this.y = y;
+                this.speed = speed;
+                this.color = color;
+                this.sizeLimit = canvas.height/count;
+                this.remove = false;
+                this.size = this.sizeLimit;
+            }
+
+            draw() {
+                c.beginPath();
+                c.fillStyle = this.color;
+                var middleX = this.x + this.sizeLimit/2;
+                var middleY = this.y + this.sizeLimit/2;
+                c.rect(middleX - this.size/2, middleY - this.size/2,this.size,this.size);
+                c.fill();
+                c.closePath();
+            }
+
+            update() {
+                if (this.size > 0.5) {
+                    this.size -= this.speed;
+                } else {
+                    this.remove = true;
+                }
+            }
+        }
+    </script>
+    <!-- this script is used to handle the pathfinder main mechanic -->
+    <script>
+        function normal(cells) {
+            var start = getStartOrEnd('start');
+            openCells.push(cells[start[0]][start[1]]);
+            algorythmDone = false;
+            overloop = false;
+            pathFound = false;
+            moveIndex = 0;
+            algorythmRunning = true;
+            movingStartOrEnd = 'end';
+            accessMovement();
+            quickAfterBeforeSet('end');
+        }
+
+        let path;
+        let openCells = [];
+        let exploredCells = [];
+        let algorythmDone = true;
+        let endCell = undefined;
+        let overloop = false;
+        let pathFound = false;
+        let pathsRecognized = false;
+        let algorythmRunning = false;
+
+
+        function getPath(fromStartOrEnd) {
+            var currentCell = undefined;
+            var currentCordinates = getStartOrEnd(fromStartOrEnd);
+            currentCell = cells[currentCordinates[0]][currentCordinates[1]];
+            if (currentCell == undefined) return;
+            var path = [];
+
+            while (true) {
+                if (fromStartOrEnd == 'end') {
+                    if (currentCell.beforeCell != undefined) {
+                        path.push(currentCell);
+                        currentCell = cells[currentCell.beforeCell[0]][currentCell.beforeCell[1]];
+                        if (currentCell.state == 'start') break;
+                    } else {
+                        break;
+                    }
+                }
+                else if (fromStartOrEnd == 'start') {
+                    if (currentCell.afterCell != undefined) {
+                        path.push(currentCell);
+                        currentCell = cells[currentCell.afterCell[0]][currentCell.afterCell[1]];
+                        if (currentCell.state == 'end') break;
+                    } else {
+                        break;
+                    }
+                }
+                if (currentCell.state == 'wall') return [];
+            }
+            return path;
+        }
+
+        let moveIndex = 0;
+        function accessMovement() {
+            if (algorythmDone && !pathFound) {
+                var path1 = getPath('end');
+                path = path1;
+                visualizePath();
+                pathFound = true;
+            };
+            if (overloop) {
+                pathsRecognized = true;
+                algorythmRunning = false;
+                quickRunShouldRun = true;
+                return;
+            };
+            if (!algorythmDone) {
+                setTimeout(accessMovement, 100);
+            } else {
+                editable = false;
+                setTimeout(accessMovement, 1);
+            }
+            
+            var newSet = [];
+            for (let i = 0; i < openCells.length; i++) {
+                setUpCellSelect(-1,0,openCells[i],newSet);
+                setUpCellSelect(1,0,openCells[i],newSet);
+                setUpCellSelect(0,-1,openCells[i],newSet);
+                setUpCellSelect(0,1,openCells[i],newSet);
+                if (!diagenals) continue;
+                setUpCellSelect(-1,-1,openCells[i],newSet);
+                setUpCellSelect(1,-1,openCells[i],newSet);
+                setUpCellSelect(-1,1,openCells[i],newSet);
+                setUpCellSelect(1,1,openCells[i],newSet);
+                
+            }
+            if (newSet.length == 0) {
+                algorythmDone = true;
+                overloop = true;
+                return;
+            }
+            openCells = newSet;
+            moveIndex++;
+        }
+
+        let index = 0;
+        function visualizePath() {
+            if (path == undefined) return;
+            if (index >= path.length) return;
+            setTimeout(visualizePath,40);
+            if (path[index].state != 'end')
+            effectCells.push(new formingCell(path[index].x,path[index].y,
+                colorCases.path,5,path[index]));
+            path[index].isPath = true;
+            index ++;
+        }
+
+        function setUpCellSelect(a,b,current,newSet) {
+            if (current.row + a >= 0 && current.row + a < cells.length && current.col + b >= 0 && current.col + b < cells.length) {
+                if (cells[current.row + a][current.col + b].state == 'wall') {
+                    exploredCells.push(cells[current.row + a][current.col + b]);
+                    if (cells[current.row + a][current.col + b].beforeCell == undefined)
+                    cells[current.row + a][current.col + b].beforeCell = [current.row,current.col];
+                    if (cells[current.row + a][current.col + b].layerBefore == undefined)
+                    cells[current.row + a][current.col + b].layerBefore = moveIndex;
+                };
+                if (cells[current.row + a][current.col + b].state == 'start') return;
+
+
+                if (cells[current.row + a][current.col + b].state == 'end' && !algorythmDone) {
+                    if (cells[current.row + a][current.col + b].beforeCell == undefined)
+                    cells[current.row + a][current.col + b].beforeCell = [current.row,current.col];
+                    cells[current.row + a][current.col + b].layerBefore = moveIndex;
+                    algorythmDone = true;
+                    endCell = cells[current.row + a][current.col + b];
+                    newSet.push(cells[current.row + a][current.col + b]);
+                    exploredCells.push(cells[current.row + a][current.col + b]);
+                    cells[current.row + a][current.col + b].pathShow = true;
+                    cells[current.row + a][current.col + b].show = true;
+                    return;
+                }
+
+
+                if (exploredCells.includes(cells[current.row + a][current.col + b])) return;
+
+                if (!algorythmDone) {
+                    cells[current.row + a][current.col + b].explored = true;
+                }
+                if (cells[current.row + a][current.col + b].beforeCell == undefined)
+                cells[current.row + a][current.col + b].beforeCell = [current.row,current.col];
+                newSet.push(cells[current.row + a][current.col + b]);
+                exploredCells.push(cells[current.row + a][current.col + b]);
+                cells[current.row + a][current.col + b].layerBefore = moveIndex;
+
+                effectCells.push(new formingCell(cells[current.row + a][current.col + b].x,cells[current.row + a][current.col + b].y,
+                    colorCases.exploredFromStart,4,cells[current.row + a][current.col + b]));      
+            }
+        }
+
+        function getStartOrEnd(startOrEnd) {
+            for (let row = 0; row < cells.length; row++) {
+                for (let col = 0; col < cells[row].length; col++) {
+                    if (startOrEnd == 'start')
+                        if (cells[row][col].state == 'start') return [row,col];
+                    if (startOrEnd == 'end')
+                        if (cells[row][col].state == 'end') return [row,col];
+                }
+            }
+        }
+
+        function quickPathShow(path) {
+            path.forEach(cell => {
+                cell.isPath = true;
+                cell.pathShow = true;
+            });
+        }
+
+        function resetPathShown() {
+            for (let row = 0; row < cells.length; row++) {
+                for (let col = 0; col < cells[row].length; col++) {
+                    cells[row][col].isPath = false;
+                    cells[row][col].explored = false;
+                }
+            }
+        }
+
+        function quickExploreShow(layer,afterOrBefore) {
+            for (let row = 0; row < cells.length; row++) {
+                for (let col = 0; col < cells[row].length; col++) {
+                    if (cells[row][col].state == 'end' || cells[row][col].state == 'wall') continue;
+                    if (afterOrBefore == 'before') {
+                        if (cells[row][col].layerBefore <= layer) {
+                            cells[row][col].explored = true;
+                        } else {
+                            cells[row][col].explored = false;
+                        }
+                    }
+                    if (afterOrBefore == 'after') {
+                        if (cells[row][col].layerAfter <= layer) {
+                            cells[row][col].explored = true;
+                        } else {
+                            cells[row][col].explored = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        let quickRunShouldRun = false;
+        function quickAfterBeforeSet(fromStartOrEnd) { //defines the news paths from the end or the beggining, to the other
+            //note: the main algorythm runs in the mode "fromStart" and uses beforeCell
+            // the other finder is "fromEnd" and uses the afterCell
+            //this function is the main order setter of the code that runns in diffrent functions and sets
+            var openCells = [];
+            var exploredCells = [];
+            var overloop = false;
+
+            if (fromStartOrEnd == 'start') {
+                var startCordinates = getStartOrEnd('start');
+                openCells.push(cells[startCordinates[0]][startCordinates[1]]);
+                exploredCells.push(cells[startCordinates[0]][startCordinates[1]]);
+            } else if (fromStartOrEnd == 'end') {
+                var endCordinates = getStartOrEnd('end');
+                openCells.push(cells[endCordinates[0]][endCordinates[1]]);
+                exploredCells.push(cells[endCordinates[0]][endCordinates[1]]);
+
+            }
+
+            var index = 0;
+            var tragetFound = false;
+            while (!overloop) {
+                var newOpenCells = [];
+                if (fromStartOrEnd == 'start') {
+                    for (let i = 0; i < openCells.length; i++) {
+                        quickProccessOnBlocksRun(-1,0,openCells[i],newOpenCells,exploredCells,fromStartOrEnd,index,tragetFound);
+                        quickProccessOnBlocksRun(1,0,openCells[i],newOpenCells,exploredCells,fromStartOrEnd,index,tragetFound);
+                        quickProccessOnBlocksRun(0,1,openCells[i],newOpenCells,exploredCells,fromStartOrEnd,index,tragetFound);
+                        quickProccessOnBlocksRun(0,-1,openCells[i],newOpenCells,exploredCells,fromStartOrEnd,index,tragetFound);
+                        if (diagenals) {
+                            quickProccessOnBlocksRun(-1,1,openCells[i],newOpenCells,exploredCells,fromStartOrEnd,index,tragetFound);
+                            quickProccessOnBlocksRun(-1,-1,openCells[i],newOpenCells,exploredCells,fromStartOrEnd,index,tragetFound);
+                            quickProccessOnBlocksRun(1,1,openCells[i],newOpenCells,exploredCells,fromStartOrEnd,index,tragetFound);
+                            quickProccessOnBlocksRun(1,-1,openCells[i],newOpenCells,exploredCells,fromStartOrEnd,index,tragetFound);
+                        }
+                    }
+                }
+                else if (fromStartOrEnd == 'end') {
+                    for (let i = 0; i < openCells.length; i++) {
+                        quickProccessOnBlocksRun(0,-1,openCells[i],newOpenCells,exploredCells,fromStartOrEnd,index,tragetFound);
+                        quickProccessOnBlocksRun(0,1,openCells[i],newOpenCells,exploredCells,fromStartOrEnd,index,tragetFound);
+                        quickProccessOnBlocksRun(1,0,openCells[i],newOpenCells,exploredCells,fromStartOrEnd,index,tragetFound);
+                        quickProccessOnBlocksRun(-1,0,openCells[i],newOpenCells,exploredCells,fromStartOrEnd,index,tragetFound);
+                        if (diagenals) {
+                            quickProccessOnBlocksRun(1,-1,openCells[i],newOpenCells,exploredCells,fromStartOrEnd,index,tragetFound);
+                            quickProccessOnBlocksRun(1,1,openCells[i],newOpenCells,exploredCells,fromStartOrEnd,index,tragetFound);
+                            quickProccessOnBlocksRun(-1,-1,openCells[i],newOpenCells,exploredCells,fromStartOrEnd,index,tragetFound);
+                            quickProccessOnBlocksRun(-1,1,openCells[i],newOpenCells,exploredCells,fromStartOrEnd,index,tragetFound);
+                        }
+                    }
+                }
+                openCells = newOpenCells;
+                if (openCells.length == 0) break;
+                index++;
+            }
+        }
+        function quickProccessOnBlocksRun(a,b,current,newCells,exploredCells,fromStartOrEnd,index,tragetFound) {
+            if (current.row + a < 0 || current.row + a >= count || current.col + b < 0 || current.col + b >= count) return false;
+            var cellWorkingOn = cells[current.row + a][current.col + b]
+            if (exploredCells.includes(cellWorkingOn)) return false;
+            exploredCells.push(cellWorkingOn);
+            if (cellWorkingOn.state != 'wall')
+                newCells.push(cellWorkingOn);
+            if (fromStartOrEnd == 'start') {
+                if (cellWorkingOn.state != 'start') {
+                    cellWorkingOn.beforeCell = [current.row,current.col];
+                    if (current.state != 'wall')
+                    cellWorkingOn.layerBefore = index;
+                }
+            } else if (fromStartOrEnd == 'end') {
+                if (cellWorkingOn.state != 'end') {
+                    cellWorkingOn.afterCell = [current.row,current.col];
+                    if (current.state != 'wall')
+                    cellWorkingOn.layerAfter = index;
+                }
+            }
+        }
+    </script>
+    <!-- this script holds the class for a single cell -->
+    <script>
+        class Cell {
+            constructor(row,col,state) {
+                this.row = row;
+                this.col = col;
+                this.state = state;
+                this.wasWall = false;
+                this.x = undefined;
+                this.y = undefined;
+                this.beforeCell = undefined;
+                this.afterCell = undefined;
+                this.explored = false;
+                this.isPath = false;
+                this.layerBefore = undefined;
+                this.layerAfter = undefined;
+                this.show = false;
+                this.pathShow = false;
+            }
+
+            setColorByState(showBorders) {
+                if (this.state == 'empty') {
+                    c.fillStyle = colorCases.empty;
+                }
+                if (this.state == 'wall') {
+                    if (this.show) {
+                        c.fillStyle = colorCases.wall;
+                    } else {
+                        c.fillStyle = colorCases.empty;
+                    }
+                }
+                if (this.state == 'start') {
+                    c.fillStyle = colorCases.start;
+                }
+                if (this.state == 'end') {
+                    c.fillStyle = colorCases.end;
+                }
+                if (this.explored && (this.show || quickRunShouldRun) && (this.state != 'start' && this.state != 'end')) {
+                    c.fillStyle = movingStartOrEnd == 'end' ? colorCases.exploredFromStart : colorCases.exploredFromEnd;
+                }
+                if (this.state != 'end' && this.state != 'start' && this.isPath && this.pathShow) {
+                    c.fillStyle = colorCases.path;
+                }
+                switch (showBorders) {
+                    case false:
+                        c.strokeStyle = c.fillStyle;
+                        break;
+                    case true:
+                        c.strokeStyle = 'black';
+                        break;
+                    default:
+                        break;
+                }  
+            }
+
+            draw(c,gridSize,count,offset,showBorders) {
+                c.beginPath();
+                this.setColorByState(showBorders);
+                this.x = offset+gridSize[0]/count*this.row;
+                this.y = gridSize[1]/count*this.col;
+                c.rect(this.x,this.y,gridSize[1]/count,gridSize[1]/count);
+                c.fill();
+                c.stroke();
+                c.closePath();
+            }
+        }
+    </script>
+    <!-- this is the main script that bounds everything on a single board -->
+    <script>
+        const canvas = document.getElementById('main');
+        const c = canvas.getContext('2d');
+        let count = 23;
+        let showBorders = false;
+        let movingStartOrEnd = undefined;
+
+        const colorCases = {
+            wall: 'rgb(30,30,30)',
+            empty: 'rgb(200,200,200)',
+            start: 'hsl(150,50%,50%)',
+            end: 'hsl(1,50%,50%)',
+            path: 'hsl(255,50%,50%)',
+            exploredFromStart: 'hsl(30,20%,50%)',
+            exploredFromEnd: 'hsl(50,20%,50%)'
+        }
+
+        function resize() {
+            if (innerWidth >= innerHeight) {
+                canvas.width = innerHeight;        
+                canvas.height = innerHeight;    
+            } else {
+                canvas.width = innerWidth;        
+                canvas.height = innerWidth;
+            }
+            
+        }
+        resize();
+        addEventListener('resize',resize);
+
+        mouse = {
+            x:canvas.width/2,
+            y: canvas.height/2,
+            down: false,
+            state: 'wall'
+        };
+        let mouseModeSet = false;
+
+        //mouse events
+        addEventListener('mousedown',()=>{
+            mouse.down = true;
+        });
+
+        addEventListener('mouseup',()=>{
+            mouse.down = false;
+            mouseModeSet = false;
+
+            if (mouse.state == 'startMove') {
+                if (quickRunShouldRun) {
+                    resetLayers();
+                    quickAfterBeforeSet('start');
+                    quickAfterBeforeSet('end');
+                }
+            }
+            if (mouse.state == 'endMove') {
+                if (quickRunShouldRun) {
+                    resetLayers();
+                    quickAfterBeforeSet('end');
+                    quickAfterBeforeSet('start');
+                }
+            }
+        });
+
+        addEventListener('mousemove',(e)=>{
+            if (innerWidth >= innerHeight) {
+                mouse.x = e.clientX - innerWidth/2 + innerHeight/2;
+                mouse.y = e.clientY;
+            } else {
+                mouse.x = e.clientX;
+                mouse.y = e.clientY - innerHeight/2 + innerWidth/2;
+            }
+        })
+
+        //touch events
+        canvas.addEventListener('touchstart',(e)=>{
+            e.preventDefault();
+            if (innerWidth >= innerHeight) {
+                mouse.x = e.touches[0].clientX - innerWidth/2 + innerHeight/2;
+                mouse.y = e.touches[0].clientY - cellSize * 2;
+            } else {
+                mouse.x = e.touches[0].clientX;
+                mouse.y = e.touches[0].clientY - innerHeight/2 + innerWidth/2 - cellSize * 2;
+            }
+            mouse.down = true;
+        });
+        canvas.addEventListener('touchmove',(e)=>{
+            e.preventDefault();
+            if (innerWidth >= innerHeight) {
+                mouse.x = e.touches[0].clientX - innerWidth/2 + innerHeight/2;
+                mouse.y = e.touches[0].clientY - cellSize * 2;
+            } else {
+                mouse.x = e.touches[0].clientX;
+                mouse.y = e.touches[0].clientY - innerHeight/2 + innerWidth/2 - cellSize * 2;
+            }
+        });
+        canvas.addEventListener('touchend',(e)=>{
+            e.preventDefault();
+            mouse.down = false;
+            mouseModeSet = false;
+
+            if (mouse.state == 'startMove') {
+                if (quickRunShouldRun) {
+                    resetLayers();
+                    quickAfterBeforeSet('start');
+                    quickAfterBeforeSet('end');
+                }
+            }
+            if (mouse.state == 'endMove') {
+                if (quickRunShouldRun) {
+                    resetLayers();
+                    quickAfterBeforeSet('end');
+                    quickAfterBeforeSet('start');
+                }
+            }
+        });
+
+        let cells = [];
+        let cellSize = canvas.height/count;
+        function addCells() {
+            for (let row = 0; row < count; row++) {
+                cells.push([]);
+                for (let col = 0; col < count; col++) {
+                    cells[cells.length-1].push(new Cell(row,col,'empty'));
+                    if (row == 0 && col == 0) {
+                        cells[row][col].state = 'start';
+                    }
+                    if (row == count-1 && col == count-1) {
+                        cells[row][col].state = 'end';
+                    }
+                }
+            }
+        }
+        addCells();
+
+        let effectCells = [];
+
+        let startCell = cells[getStartOrEnd('end')[0]][getStartOrEnd('end')[1]];
+
+        function checkForCellClick() {
+            if (algorythmRunning) return;
+            if (!mouse.down) return;
+            for (let row = 0; row < count; row++) {
+                for (let col = 0; col < count; col++) {
+                    if (cells[row][col].x < mouse.x && cells[row][col].x + cellSize > mouse.x) {
+                        if (cells[row][col].y < mouse.y && cells[row][col].y + cellSize > mouse.y) {
+                            if (!mouseModeSet) {
+                                switch (cells[row][col].state) {
+                                    case 'wall':
+                                        mouse.state = 'empty';
+                                        break;
+                                    case 'empty':
+                                        mouse.state = 'wall';
+                                        break;
+                                    case 'start':
+                                        mouse.state = 'startMove';
+                                        break;
+                                    case 'end':
+                                        mouse.state = 'endMove';
+                                        break;
+                                }
+                                mouseModeSet = true;
+                            }
+                            if (mouse.state === 'wall') {
+                                if (cells[row][col].state === 'start' || cells[row][col].state === 'end') continue;
+                                if (algorythmDone) clearPath();
+                                if (cells[row][col].state === 'empty')
+                                effectCells.push(new formingCell(cells[row][col].x,cells[row][col].y,
+                                    colorCases.wall,5,cells[row][col]));
+                                cells[row][col].state = 'wall';
+                                cells[row][col].wasWall = true;
+                                quickRunShouldRun = false;
+                            } else if (mouse.state === 'empty') {
+                                if (cells[row][col].state === 'start' || cells[row][col].state === 'end') continue;
+                                if (algorythmDone) clearPath();
+                                if (cells[row][col].state === 'wall')
+                                effectCells.push(new FaddingCell(cells[row][col].x,cells[row][col].y,
+                                    colorCases.wall,5));
+                                cells[row][col].state = 'empty';
+                                cells[row][col].wasWall = false;
+                                quickRunShouldRun = false;
+                            } else if (mouse.state === 'startMove') {
+                                setStart(row,col);
+                                movingStartOrEnd = 'start';
+                            } else if (mouse.state === 'endMove') {
+                                setEnd(row,col);
+                                movingStartOrEnd = 'end';
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function setStart(row, col) {
+            if (algorythmDone) clearPath();
+            if (cells[row][col].state !== 'end') {
+                for (let rowI = 0; rowI < count; rowI++) {
+                    for (let colI = 0; colI < count; colI++) {
+                        if (cells[rowI][colI].state === 'start') {
+                            if (cells[rowI][colI].wasWall) {
+                                cells[rowI][colI].state = 'wall';
+                                cells[rowI][colI].show = true;
+                            } else {
+                                cells[rowI][colI].state = 'empty';
+                            }
+                        }
+                    }
+                }
+                cells[row][col].state = 'start';
+
+                if (quickRunShouldRun) {
+                    path = getPath('start');
+                    resetPathShown();
+                    quickPathShow(path);
+                    quickExploreShow(cells[row][col].layerAfter,'after');
+                    play_note(100, 'sine');
+                }
+            }
+        } 
+        function setEnd(row, col) {
+            if (cells[row][col].state != 'start') {
+                for (let rowI = 0; rowI < count; rowI++) {
+                    for (let colI = 0; colI < count; colI++) {
+                        if (cells[rowI][colI].state == 'end') {
+                            if (cells[rowI][colI].wasWall) {
+                                cells[rowI][colI].state = 'wall';
+                            } else {
+                                cells[rowI][colI].state = 'empty';
+                            }
+                        }
+                    }
+                }
+                cells[row][col].state = 'end';
+
+                if (quickRunShouldRun) {
+                    path = getPath('end');
+                    resetPathShown();
+                    quickPathShow(path);
+                    quickExploreShow(cells[row][col].layerBefore,'before');
+                    play_note(100, 'sine');
+                }
+            }
+        } 
+
+        function animate() {
+            requestAnimationFrame(animate);
+            c.clearRect(0,0,canvas.width,canvas.height);
+            for (let row = 0; row < count; row++) {
+                for (let col = 0; col < count; col++) {
+                    var offset = canvas.width/2 - canvas.height/2;
+                    cells[row][col].draw(c,[canvas.height,canvas.height],count,offset,showBorders);
+                }
+            }
+            checkForCellClick();
+            for (let i = effectCells.length-1; i >= 0; i--) { 
+                effectCells[i].draw();
+                effectCells[i].update();
+                if (effectCells[i].remove) {
+                    effectCells.splice(i,1);
+                }
+            }
+        }
+        animate();
+
+        document.getElementById('clearButton').addEventListener('click',()=> {
+            if (algorythmRunning) return;
+            clearPath();
+            reset();
+            quickRunShouldRun = false;
+        });
+        document.getElementById('visualize').addEventListener('click',()=> {
+            if (algorythmRunning) return;
+            clearPath();
+            normal(cells);
+            quickRunShouldRun = false;
+        });
+
+
+        let diagenals = false;
+        const diagenalsInput = document.getElementById('diagenals');
+        diagenalsInput.addEventListener('change',()=> {
+            diagenals = !diagenals;
+            quickRunShouldRun = false;
+        });
+
+        document.getElementById('resetButton').addEventListener('click',()=> {
+            if (algorythmRunning) return;
+            clearPath();
+            quickRunShouldRun = false;
+        });
+
+        document.getElementById('showBorders').addEventListener('change',(e)=>{
+            showBorders = !showBorders;
+        })
+
+        function clearPath() {
+            for (let row = 0; row < count; row++) {
+                for (let col = 0; col < count; col++) {
+                    cells[row][col].beforeCell = undefined;
+                    cells[row][col].explored = false;
+                    cells[row][col].isPath = false;
+                    cells[row][col].layerBefore = undefined;
+                    if (cells[row][col].state != 'wall') {
+                        cells[row][col].show = false;
+                        cells[row][col].pathShow = false;
+                    }
+                }
+            }
+            index = 0;
+            openCells = [];
+            exploredCells = [];
+            path = [];
+            endCell = undefined;
+        }
+        function reset() {
+            for (let row = 0; row < count; row++) {
+                for (let col = 0; col < count; col++) {
+                    if (cells[row][col].state == 'wall')
+                        effectCells.push(new FaddingCell(cells[row][col].x,cells[row][col].y,
+                            colorCases.wall,5));
+                    cells[row][col].state = cells[row][col].state != 'end' 
+                    && cells[row][col].state != 'start' ? 'empty' : cells[row][col].state;
+                    cells[row][col].wasWall = false;
+                }
+            }
+        }
+
+        addEventListener('keydown',(event)=>{
+            if (algorythmRunning) return;
+            switch (event.key) {
+                case 'c':
+                    reset();
+                    clearPath();
+                    break;
+                case 'x':
+                    clearPath();
+                    break;
+                case 'r':
+                    clearPath();
+                    normal(cells);
+                    break;
+                default:
+                    break;
+            }
+        })
+
+        const toolbar_button = document.querySelector(".toolbar-button");
+        const toolbar = document.querySelector("#toolBar");
+        let is_toolbar_on = false;
+
+        toolbar_button.addEventListener("click", ()=>{
+            if (!is_toolbar_on) {
+                toolBar.style.display = "flex";
+                is_toolbar_on = true;
+            } else {
+                toolbar.style.display = "none";
+                is_toolbar_on = false;
+            }
+        });
+
+        function resetLayers() {
+            for (let row = 0; row < count; row++) {
+                for (let col = 0; col < count; col++) {
+                    cells[row][col].layerAfter = undefined;
+                    cells[row][col].layerBefore = undefined;
+                }
+            }
+        }
+    </script>
+    <!-- this script handles diffrent testing areas by the button press event -->
+    <script>
+        document.getElementById('chamber-random-blocks').addEventListener('click',()=> {
+            if (algorythmRunning) return;
+
+            clearPath();
+            reset();
+            algorythmRunning = true;
+            var generatedTiles = [];
+            const limit = count*count * 0.16;
+            
+            for (let i = 0; i < limit; i++) {
+                while (true) {
+                    var randRow = Math.floor(Math.random()*count);
+                    var randCol = Math.floor(Math.random()*count);
+                    if (cells[randRow][randCol].state == 'start' || cells[randRow][randCol].state == 'end') {
+                        continue;
+                    } else if (generatedTiles.includes(cells[randRow][randCol])) {
+                        continue;
+                    } else {
+                        cells[randRow][randCol].state = 'wall';
+                        effectCells.push(new formingCell(cells[randRow][randCol].x,cells[randRow][randCol].y,
+                            colorCases.wall,5,cells[randRow][randCol]));
+                        generatedTiles.push(cells[randRow][randCol]);
+                        cells[randRow][randCol].wasWall = true;
+                        break;
+                    }
+                }
+            }
+            algorythmRunning = false;
+        });
+
+        shapes = [
+            [[0,0],[-1,0],[1,0]],
+            [[0,0],[0,1],[0,-1]],
+            [[0,0],[0,1],[1,0],[1,1]],
+            [[0,0],[1,0],[0,-1]],
+            [[0,0],[-1,0],[0,-1]],
+            [[0,0],[1,0],[0,1]],
+            [[0,0],[-1,0],[0,-1]],
+            [[0,0],[1,0],[-1,0],[0,1],[0,-1]]
+        ];
+
+        function checkForShape(shape,x,y) {
+            for (let i = 0; i < shape.length; i++) {
+                if (x + shape[i][0] < 0 || x + shape[i][0] >= count) return false;
+                if (y + shape[i][1] < 0 || y + shape[i][1] >= count) return false;
+                if (cells[x + shape[i][0]][y + shape[i][1]].state == 'start') return false;
+                if (cells[x + shape[i][0]][y + shape[i][1]].state == 'end') return false;
+            }
+            return true;
+        }
+        function drawShape(shape,x,y) {
+            for (let i = 0; i < shape.length; i++) {
+                cells[x + shape[i][0]][y + shape[i][1]].state = 'wall';
+                effectCells.push(new formingCell(cells[x + shape[i][0]][y + shape[i][1]].x,cells[x + shape[i][0]][y + shape[i][1]].y,
+                    colorCases.wall,5,cells[x + shape[i][0]][y + shape[i][1]]));
+                cells[x + shape[i][0]][y + shape[i][1]].wasWall = true;
+            }
+        }
+
+        document.getElementById('chamber-random-shapes').addEventListener('click',()=>{
+            if (algorythmRunning) return;
+
+            clearPath();
+            reset();
+
+            algorythmRunning = true;
+
+            for (let i = 0; i < 30; i++) {
+                while (true) {
+                    var randX = Math.floor(Math.random()*count);
+                    var randY = Math.floor(Math.random()*count);
+                    var shapeIndex = Math.floor(Math.random()*shapes.length);
+                    if (checkForShape(shapes[shapeIndex],randX,randY)) {
+                        drawShape(shapes[shapeIndex],randX,randY);
+                        break;
+                    }
+                }
+                
+            }
+            algorythmRunning = false;
+        });
+
+        let holChamberDelay = 100;
+        document.getElementById('chmaber-random-hole').addEventListener('click',()=>{
+            if (algorythmRunning) return;
+
+            clearPath();
+            reset();
+
+            algorythmRunning = true;
+
+            for (let row = 1; row < count; row+=2) {
+                for (let col = 0; col < count; col++) {
+                    if (cells[row][col].state == 'start' || cells[row][col].state == 'end') {
+                        continue;
+                    }
+                    effectCells.push(new formingCell(cells[row][col].x,cells[row][col].y,
+                        colorCases.wall,5,cells[row][col]));
+                    cells[row][col].state = 'wall';
+                    cells[row][col].wasWall = true;
+                }
+            }
+            setTimeout(removeLinePeaces,holChamberDelay);
+        });
+
+        let indexRemoval = 1;
+        function removeLinePeaces() {
+            if (indexRemoval >= count) {
+                indexRemoval = 1;
+                setTimeout(addExtraBlocks,holChamberDelay);
+                return;
+            }
+            setTimeout(removeLinePeaces,holChamberDelay);
+            var removeCountRandom = Math.floor(Math.random()*5) + 4;
+            for (let s = 0; s < removeCountRandom; s++) {
+                var whileIndex = 0;
+                while (true) {
+                    var randCol = Math.floor(Math.random()*count);
+                    if (cells[indexRemoval][randCol].state == 'start' || cells[indexRemoval][randCol].state == 'end') {
+                        continue;
+                    }
+                    if (checkForBlockRemoval(indexRemoval,randCol)) {
+                        break;
+                    }
+                    whileIndex ++;
+                    if (whileIndex >= 10) break;
+                }
+                
+                effectCells.push(new FaddingCell(cells[indexRemoval][randCol].x,cells[indexRemoval][randCol].y,
+                    colorCases.wall,5));
+                cells[indexRemoval][randCol].state = 'empty';
+                cells[indexRemoval][randCol].wasWall = false;
+            }
+            indexRemoval += 2;
+        }
+
+        let indexAdded = 0;
+        function addExtraBlocks() {
+            if (indexAdded >= count) {
+                indexAdded = 0;
+                algorythmRunning = false;
+                return;
+            }
+            setTimeout(addExtraBlocks,holChamberDelay);
+            var numberAdded = Math.floor(Math.random()*2) + 1;
+            for (let s = 0; s < numberAdded; s++) {
+                var whileIndex = 0;
+                while (true) {
+                    var randCol = Math.floor(Math.random()*count);
+                    if (cells[indexAdded][randCol].state == 'start' || cells[indexAdded][randCol].state == 'end') {
+                        continue;
+                    }
+                    if (checkForBlockPlacement(indexAdded,randCol)) {
+                        break;
+                    }
+                    whileIndex ++;
+                    if (whileIndex >= 10) {
+                        break;
+                    }
+                }
+
+                effectCells.push(new formingCell(cells[indexAdded][randCol].x,cells[indexAdded][randCol].y,
+                    colorCases.wall,5,cells[indexAdded][randCol]));
+                cells[indexAdded][randCol].state = 'wall';
+                cells[indexAdded][randCol].wasWall = true;
+            }
+            indexAdded += 2;
+        }
+
+        function checkForBlockRemoval(row,col) {
+            if (row + 2 < 0 || row + 2 >= count) return false;
+            if (row - 2 < 0 || row - 2 >= count) return false;
+            if (col + 1 < 0 || col + 1 >= count) return false;
+            if (col - 1 < 0 || col - 1 >= count) return false;
+            if (cells[row][col-1].state == 'empty' || cells[row][col+1].state == 'empty') return false;
+            if (cells[row-2][col].state == 'empty' || cells[row+2][col].state == 'empty') return false;
+            return true;
+        }
+
+        function checkForBlockPlacement(row,col) {
+            if (row + 1 < 0 || row + 1 >= count) return false;
+            if (row - 1 < 0 || row - 1 >= count) return false;
+            if (col + 1 < 0 || col + 1 >= count) return false;
+            if (col - 1 < 0 || col - 1 >= count) return false;
+            if (cells[row][col-1].state == 'wall' || cells[row][col+1].state == 'wall') return false;
+            if (cells[row-1][col].state == 'empty' || cells[row+1][col].state == 'empty') return false;
+            return true;
+        }
+    </script>
+</body>
+</html>

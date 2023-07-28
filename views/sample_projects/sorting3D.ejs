@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>3d sorting visualizer</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: rgb(10, 10, 10);
+        }
+
+        .main {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -10;
+            transform: scale(80%);
+        }
+
+        .return-button {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            width: 30px;
+            aspect-ratio: 1/1;
+            background: gray;
+            color: rgb(10, 10, 10);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .actions {
+            position: fixed;
+            top: 10px;
+            left: 60px;
+            height: 30px;
+            width: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            column-gap: 10px;
+        }
+
+        .actions button {
+            height: 100%;
+        }
+
+        .actions button:first-child {
+            width: 30px;
+        }
+
+        .actions button:last-child {
+            flex: 1;
+        }
+
+        .options {
+            position: fixed;
+            top: 60px;
+            left: 10px;
+            display: flex;
+            flex-direction: column;
+            background: #c0c0c0;
+            padding: 10px;
+            width: 140px;
+        }
+
+        .options div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .options div input {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<a href="/sample-projects" class="return-button"><</a>
+<div class="actions">
+    <button onclick="init()">init</button>
+    <button onclick="play()">play</button>
+</div>
+<div class="options">
+    <div>
+        <label for="toggle-sounds">sounds:</label>
+        <input type="button" name="toggle-sounds" value="toggle" onclick="play_sounds = !play_sounds;">
+    </div>
+    <div>
+        <label for="count">count:</label>
+        <input type="number" name="count" id="count" value="10">
+        <input type="button" name="count-apply" value="apply" onclick="apply_col_count(document.querySelector('#count').value);">
+    </div>
+    <div>
+        <label for="jumps">do-jumps:</label>
+        <input type="button" name="jumps" value="toggle" onclick="do_jumps = !do_jumps;">
+    </div>
+</div>
+<canvas class="main"></canvas>
+
+<script>
+    function lerp(a,b,t) {
+        return a + (b - a) * t;
+    }
+</script>
+<script>
+    class Col {
+        constructor(x,y,width,height,color) {
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            this.queue = [];
+            this.color = color;
+            this.begining_color = {r: this.color.r, g: this.color.g, b: this.color.b};
+        }
+
+        jump(frame_count=20) {
+            for (let i = 0; i < frame_count; i++) {
+                const t = i/frame_count;
+                const u = Math.sin(t*Math.PI);
+                this.queue.push({
+                    x: this.x,
+                    y: this.y - u * this.width,
+                    r: lerp(this.begining_color.r , 0, u),
+                    g: lerp(this.begining_color.g, 0, u),
+                    b: lerp(this.begining_color.b, 255, u),
+                });
+            }
+
+            this.queue.push({
+                x: this.x,
+                y: this.y,
+                r: this.begining_color.r,
+                g: this.begining_color.g,
+                b: this.begining_color.b,
+            });
+        }
+
+        move_to(loc,y_offset = 1,frame_count=20) {
+            for (let i = 1; i <= frame_count; i++) {
+                const t = i/frame_count;
+                const u = Math.sin(t*Math.PI);
+                this.queue.push({
+                    x: lerp(this.x, loc.x, t),
+                    y: lerp(this.y, loc.y, t) + u * this.width/4 * y_offset,
+                    r: lerp(this.begining_color.r , 255, u),
+                    g: lerp(this.begining_color.g, 0, u),
+                    b: lerp(this.begining_color.b, 0, u),
+                });
+            }
+        }
+
+        draw(c) {
+            let changed = false;
+            if (this.queue.length > 0) {
+                const {x,y, r, g, b} = this.queue.shift();
+                this.x = x;
+                this.y = y;
+                this.color = {r,g,b};
+                changed = true;
+            }
+
+            const left = this.x - this.width/2;
+            const top = this.y - this.height;
+            const right = this.x + this.width/2;
+            c.beginPath();
+            const {r,g,b} = this.color
+            c.fillStyle = `rgb(${r},${g},${b})`;
+            c.moveTo(left, top);
+            c.lineTo(left, this.y);
+            c.ellipse(this.x,this.y, this.width/2, this.width/4, 0, Math.PI, Math.PI*2,true);
+            c.lineTo(right, top);
+            c.ellipse(this.x, top, this.width/2, this.width/4, 0, 0, Math.PI*2, true);
+            c.fill();
+            c.stroke();
+
+            return changed;
+        }
+    }
+
+</script>
+<script>
+    const canvas = document.querySelector(".main");
+
+    let n = 10;
+    const array = [];
+    let moves = [];
+    let playing = false;
+    let play_sounds = true;
+    let do_jumps = true;
+
+    const cols = [];
+    const margin = 30;
+    let spacing = (canvas.width - margin*2)/n;
+    const max_col_height = 200;
+
+    const c = canvas.getContext("2d");
+
+    function resize() {
+        canvas.width = innerWidth;
+        canvas.height = innerHeight;
+
+        spacing = (canvas.width - margin*2)/n;
+        init();
+    } resize();
+
+    window.addEventListener('resize', resize);
+
+    let audioC = null;
+
+    function play_note(freq, type) {
+        if (audioC === null) {
+            audioC = new (AudioContext || webkitAudioContext || window.webkitAudioContext)();
+        }
+
+        if (!do_jumps && type === 'sine') {
+            return;
+        }
+
+        if (!play_sounds) return;
+
+        const dur = .2;
+        const osc = audioC.createOscillator();
+        osc.frequency.value = freq;
+        osc.start()
+        osc.type = type;
+        osc.stop(audioC.currentTime+dur);
+        const node = audioC.createGain();
+        node.gain.value = 0.4;
+        node.gain.linearRampToValueAtTime(0, audioC.currentTime+dur);
+        osc.connect(node);
+        node.connect(audioC.destination);
+    }
+
+
+    init();
+
+    function init() {
+        for (let i = 0; i < n; i++) {
+            array[i] = Math.random();
+        }
+        moves = [];
+        for (let i = 0; i < array.length; i++) {
+            const width = spacing - 4;
+            const height = max_col_height * array[i];
+            const y = canvas.height - margin - i * lerp(10, 3, n/100) - width/4;
+            const x = spacing*i + spacing/2 + margin;
+            const color = {r: array[i]*100 + 30, g: array[i]*200 + 10, b: 200 - array[i]*200}
+            cols[i] = new Col(x,y, width,height,color);
+        }
+    }
+
+    function bobble_sort(array) {
+        const moves = [];
+        do {
+            var swapped = false;
+            for (let i = 1; i < array.length; i++) {
+                if (array[i-1] > array[i]) {
+                    swapped = true;
+                    [array[i-1], array[i]] = [array[i], array[i-1]];
+                    moves.push({
+                        indices: [i-1, i], swap: true
+                    });
+                } else {
+                    moves.push({
+                        indices: [i-1, i], swap: false
+                    });
+                }
+            }
+        } while (swapped)
+        return moves;
+    }
+
+    function play() {
+        if (playing) return;
+        playing = true;
+        moves = bobble_sort(array);
+    }
+
+    function apply_col_count(new_count) {
+        if (new_count > 100) {
+            document.querySelector("#count").value = 100;
+            n = 100;
+        } else if (new_count < 2) {
+            document.querySelector("#count").value = 2;
+            n = 2
+        } else {
+            n = new_count;
+        }
+        array.splice(0, array.length);
+        cols.splice(0, cols.length);
+        init();
+        resize();
+    }
+
+    function animate() {
+        c.fillStyle = "rgb(10,10,10)";
+        c.clearRect(0,0,canvas.width,canvas.height);
+
+        let changed = false;
+        for (let i = 0; i < cols.length; i++) {
+            changed = cols[i].draw(c)||changed;
+        }
+
+        if (moves.length > 0 && !changed) {
+            const move = moves.shift();
+            const [i,j] = move.indices;
+            const wave_type = move.swap ? "square" : "sine";
+            play_note(cols[i].height + cols[j].height, wave_type);
+            if (move.swap) {
+                cols[i].move_to(cols[j]);
+                cols[j].move_to(cols[i], -1);
+                [cols[i],cols[j]] = [cols[j], cols[i]];
+            } else if (do_jumps) {
+                cols[i].jump();
+                cols[j].jump();
+            }
+        }
+
+        if (moves.length === 0) {
+            playing = false;
+        }
+
+        requestAnimationFrame(animate);
+    } animate();
+</script>
+</body>
+</html>

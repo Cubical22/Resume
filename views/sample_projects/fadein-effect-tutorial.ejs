@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Want to know how I made the scroll animations? read me</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft JhengHei Light",serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: #262626;
+            min-height: 100vh;
+        }
+
+        .sub-text {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-family: "Lucida Bright",serif;
+            animation: blur-to-show 1s ease-in-out;
+            white-space: nowrap;
+            font-size: min(4vw, 20px);
+        }
+
+        .term-holder {
+            background-color: #1a1a1a;
+            padding: 0 5px;
+        }
+
+        header, section {
+            max-width: 500px;
+            min-height: 100vh;
+        }
+
+        header, section {
+            display: flex;
+            width: 100%;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 50px 30px;
+            row-gap: 10px;
+        }
+
+        .title {
+            color: #479a47;
+        }
+
+        .description {
+            color: white;
+        }
+
+        header .title, header .description {
+            animation: blur-to-show 1s ease-in-out;
+        }
+
+        .script-holder {
+            max-width: 100% !important;
+        }
+
+        svg {
+            z-index: -100;
+        }
+
+        .right-side-first-svg, .right-side-second-svg {
+            position: fixed;
+            top: 0;
+            right: 0;
+            opacity: .3;
+        }
+
+        .left-side-first-svg {
+            position: fixed;
+            top: 200px;
+            left: 0;
+            opacity: .3;
+            width: 40vw;
+            min-width: 100px;
+            max-width: 200px;
+        }
+
+        .right-side-first-svg {
+            width: 40vw;
+            max-width: 450px;
+            min-width: 300px;
+        }
+
+        .right-side-second-svg {
+            top: -70px;
+            width: 30vw;
+            max-width: 350px;
+            min-width: 200px;
+        }
+
+        section {
+            min-height: 300px;
+        }
+
+        .required-section ul {
+            margin-top: 20px;
+            margin-left: 20px;
+            display: flex;
+            flex-direction: column;
+            row-gap: 5px;
+        }
+
+        .required-section ul li {
+            color: white;
+        }
+
+
+        .show-li, .show {
+            opacity: 1 !important;
+            filter: blur(0) !important;
+            transform: translateX(0) !important;
+        }
+
+        .li-fadein li , .simple-fadein{
+            opacity: 0;
+            filter: blur(5px);
+            transform: translateX(-10%);
+            transition: opacity .14s ease-out, filter .14s ease-out, transform .14s ease-out;
+            transition-delay: .3s;
+        }
+
+        .pln {
+            color: white !important;
+        }
+
+        .kwd {
+            color: #5050ff !important;
+        }
+
+        .typ {
+            color: #da4bda !important;
+        }
+
+        .pun {
+            color: #bdbd55 !important;
+        }
+
+        .str {
+            color: #56d956 !important;
+        }
+
+        .com {
+            color: #5d5d5d !important;
+        }
+
+        .prettyprint {
+            padding: 20px !important;
+            border: none !important;
+            opacity: 1 !important;
+            background-color: #131313;
+            border-radius: 10px;
+            width: 100%;
+            max-width: fit-content;
+            overflow-x: auto;
+            cursor: text !important;
+            user-select: contain !important;
+        }
+
+        a {
+            color: white;
+            cursor: pointer;
+        }
+
+        @keyframes blur-to-show {
+            0% {
+                filter: blur(5px);
+            }
+
+            100% {
+                filter: blur(0);
+            }
+        }
+
+        @media (prefers-reduced-motion) {
+            .show-li, .show {
+                transition-duration: 0s;
+            }
+        }
+    </style>
+</head>
+<body class="PR.prettyPrint()">
+<p class="sub-text">"there is always something more to learn"</p>
+<header>
+    <h1 class="title">here I will explain to you how I made the fade in effect happen on scroll</h1>
+    <p class="description">there are different peaces that form this effect. we'll be working with HTML and CSS for making the layouts
+        and animations ... <br>
+        but in order to make animations play on scroll, or being more specific when they come into view ... we need to use some
+        javascript to handle some functionalities :)</p>
+</header>
+<svg class="right-side-first-svg" id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 285.57 1521.86">
+    <defs><style>.cls-1{fill:#479a47;}</style></defs>
+    <path class="cls-1" d="M1080.43,0c0,146.14,188.57,220.43,188.57,350.43s-84.29,187.14-84.29,255.71,141.43,62.86,138.58,444.29S1366,1521.86,1366,1521.86V0Z" transform="translate(-1080.43)"/>
+</svg>
+<svg class="right-side-second-svg" id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 285.57 1521.86">
+    <defs><style>.cls-1{fill:#479a47;}</style></defs>
+    <path class="cls-1" d="M1080.43,0c0,146.14,188.57,220.43,188.57,350.43s-84.29,187.14-84.29,255.71,141.43,62.86,138.58,444.29S1366,1521.86,1366,1521.86V0Z" transform="translate(-1080.43)"/>
+</svg>
+<svg class="left-side-first-svg" id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 363.54 1633.71"><defs><style>.cls-1{fill:#479a47;}</style></defs><path class="cls-1" d="M0-265.86S88,20.43,202.86,83.86,388,332.43,300.57,454.14s78.86,248.57,61.72,373.72S-.57,934.14,0,1367.86Z" transform="translate(0 265.86)"/></svg>
+<section class="required-section">
+    <h1 class="title simple-fadein">Abilities required:</h1>
+    <p class="description simple-fadein">here is a list of all the abilities you need to know before learning this technique</p>
+    <ul class="li-fadein">
+        <li style="transition-delay: .1s;">basic understanding of vanilla javascript</li>
+        <li style="transition-delay: .3s;">core understanding of html and css concepts</li>
+        <li style="transition-delay: .5s;">time and afford :)</li>
+        <li style="transition-delay: .7s;">THAT'S ALL</li>
+    </ul>
+</section>
+
+<section>
+    <h1 class="title simple-fadein">first of all ...</h1>
+    <p class="description simple-fadein">there are two ways to make animations on scroll [both require js]. <br>
+        first one, you might know about. it's using the <span class="term-holder">window.scrollY</span>
+        or the <span class="term-holder">window.scrollX</span> variables. this variables are globally accessible <br>
+        from anywhere in you script tags. <br>
+        they pretty much return the scroll position of the user on your page. this means they can be used to edit
+        different properties dynamically based on the scrolling action. <br>
+        now, keep in mind that the value does not change dynamically! <br>
+        which means in order to make your page or your script react based on the scroll, you have to put the reaction
+        inside of an <span class="term-holder">eventListener</span> as usual. <br>
+        Here's an example:
+    </p>
+</section>
+
+<section class="script-holder simple-fadein">
+    <pre class="prettyprint">
+// all that it's doing is selecting some elements from the html page
+const color_changing_texts = document.querySelectorAll('.color-changer');
+// adding an event listener on scroll, to make elements react to the scroll
+window.addEventListener("scroll", ()=> {
+    // looping through each of them
+    color_changing_texts.forEach(element => {
+        // updating the color of the texts based on the scroll value
+        element.style.color = `hsl(${window.scrollY*0.2}, 50%, 50%)`;
+    });
+});</pre>
+</section>
+
+<section class="required-section">
+    <h1 class="title simple-fadein">The comments are pretty self-explanatory</h1>
+    <p class="description simple-fadein">but if unclear ... here is some explanation:</p>
+    <ul class="li-fadein">
+        <li style="transition-delay: .1s;"><span class="term-holder">window.scrollY</span> returns the pixel value based on how far the user
+            has scrolled. the value is based on pixels, and it's a natural number.</li>
+        <li style="transition-delay: .3s;"><span class="term-holder">.style</span> suffix allows you to access different styles applied on an element
+            <br>
+            in this case, used to update the color property (being the text color).</li>
+        <li style="transition-delay: .5s;"><span class="term-holder">"scroll"</span> event is used to make things react to the scroll of the user <br>
+            in another word, the code inside the <span class="term-holder">() => {}</span> function declared, runs whenever
+            the event is mentioned ... or played. the event in this case being the scroll.
+        </li>
+    </ul>
+</section>
+
+<section>
+    <h1 class="title">Ideas:</h1>
+    <p class="description">this is pretty much the peak of creativity. you don't have to work with the color property only.
+        <br>try doing cool things ... like moving a text through the page as the user scrolls. <br>
+        see those green things (svg format) in the background moving at different speeds, creating an illusion of 3d. <br>
+        well ... try to make a full 3d looking scene (vertically or horizontally) with the scroll of the user. <br>
+        the only limit is the screen size (not the sky this time ;) ).
+    </p>
+</section>
+
+<section>
+    <h1 class="title simple-fadein">Intersection Observer:</h1>
+    <p class="description simple-fadein">messing around with different properties or variables
+        using the <span class="term-holder">window.scrollY</span> variable is pretty cool <br>
+        but lets say it's not only the scroll that concerns you. <br>
+        Just imagin writing down all different cases for each element based on the <span class="term-holder">window.scrollY</span>
+        var to make a change when they come into view ... it's a nightmare. <br>
+        other than that, the scroll height changes based on the screen size ... meaning you would have to configure
+        another var based on both the screen height ... and the current scroll, just to check if an element is in view.
+        <br>
+        <span class="term-holder">IntersectObserver()</span> is a predefined class, in VANILLA javascript. <br>
+        It's the best thing ever. It does not have to do anything with the scrollbar, but rather if an element
+        is visible on the page or not. It's pretty simple, but a little more complex, comparing it to the last method.
+    </p>
+    <p class="description simple-fadein" style="transition-delay: .5s !important;">check out an example:</p>
+</section>
+
+<section class="script-holder simple-fadein">
+    <pre class="prettyprint">
+// making a simple observer, giving it a function with input of entries
+// pay attention to how you can pass several entries at once
+const left_fadein_observer = new IntersectionObserver((entries) => {
+entries.forEach(entry => {
+    // take note of both ".isIntersecting" and ".target"
+    if (entry.isIntersecting)
+      entry.target.classList.add("show");
+    // write this part if you want to repeat the animation
+    // if the item moves out of the view
+    else
+        entry.target.classList.remove("show");
+});
+});
+
+// document grabs some elements based on a class defined by me
+document.querySelectorAll(".simple-fadein").forEach(el => left_fadein_observer.observe(el));</pre>
+</section>
+
+<section class="required-section">
+    <h1 class="title simple-fadein">Once again:</h1>
+    <ul class="li-fadein">
+        <li style="transition-delay: .1s;"><span class="term-holder">.isIntersecting</span> is used on each input provided by the callback
+            on the observer. returns true if visible, false if not.</li>
+        <li style="transition-delay: .3s;"><span class="term-holder">.target</span> is used to refer to the element of each item. here it is used to
+            access the <span class="term-holder">classList</span> attribute on the element.</li>
+        <li style="transition-delay: .5s;"><span class="term-holder">show</span> class is just defined in the css
+            in order to play the fade in animation based on the transition provided. the below code is written in css</li>
+    </ul>
+</section>
+
+<section class="script-holder simple-fadein">
+    <pre class="prettyprint">
+.show {
+  opacity: 1 !important;
+  filter: blur(0) !important;
+  transform: translateX(0) !important;
+}
+
+.simple-fadein{
+    opacity: 0;
+    filter: blur(5px);
+    transform: translateX(-10%);
+    transition: opacity .14s ease-out, filter .14s ease-out, transform .14s ease-out;
+    transition-delay: .3s;
+}
+
+@media (prefers-reduced-motion) {
+  .show {
+      transition-duration: 0s;
+  }
+}</pre>
+    <p class="description">*sorry, the coloring is done in js, so ...</p>
+</section>
+
+<section>
+    <h1 class="title simple-fadein">Try it out!</h1>
+    <p class="description simple-fadein">honestly, this was one of my favorite things to do in a web-page. <br>
+        try messing around with anything you can. change the delay, animation style ... anything really. <br>
+        you can use <span class="term-holder">@keyframes</span>, or just make functionalities happen based on the scroll
+        of the page. like a counter rising or something</p>
+    <h1 class="title simple-fadein">Here's a cool one</h1>
+    <p class="description simple-fadein">add a system that tracks how many users have seen which parts of your website, and for how long
+        <br>it's not that hard ... requires a bit of backend though, and potentially some php. anyway, this page is already too long, so ...</p>
+    <p class="description simple-fadein">I wish you all the best of luck ... and the most creativity ;)</p>
+    <h1 class="title simple-fadein">SEE YOU</h1>
+    <p class="description simple-fadein"><a href="/sample-projects">!back!</a></p>
+</section>
+
+<script src="/libraries/pre.js.min.js"></script>
+
+<!-- this script is used in order to handle the fade in effect -->
+<script>
+    const left_fadein_observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if ([...entry.target.classList].includes("simple-fadein")) {
+                if (entry.isIntersecting)
+                    entry.target.classList.add("show");
+                else
+                    entry.target.classList.remove("show");
+            } else if ([...entry.target.classList].includes("li-fadein")) {
+                if (entry.isIntersecting) {
+                    entry.target.querySelectorAll("li").forEach(li => {
+                        li.classList.add("show-li");
+                    });
+                } else {
+                    entry.target.querySelectorAll("li").forEach(li => {
+                        li.classList.remove("show-li");
+                    });
+                }
+            }
+        });
+    });
+
+    document.querySelectorAll(".simple-fadein").forEach(el => left_fadein_observer.observe(el));
+    document.querySelectorAll(".li-fadein").forEach(el => left_fadein_observer.observe(el));
+</script>
+
+<!-- this script is used to make the background svg move slower than the rest -->
+<script>
+    const bg_svg_A = document.querySelector(".right-side-first-svg");
+    const bg_svg_B = document.querySelector(".right-side-second-svg");
+    const bg_svg_C = document.querySelector(".left-side-first-svg");
+
+    document.onscroll = () => {
+        bg_svg_A.style.top = -window.scrollY * 0.1 + "px";
+        bg_svg_B.style.top = (-window.scrollY * 0.2) - 70 + "px";
+        bg_svg_C.style.top = (-window.scrollY * .4) + 200 + "px";
+    };
+</script>
+</body>
+</html>

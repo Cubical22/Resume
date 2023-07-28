@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sign wave effect</title>
+    <style>
+        * {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        html {
+            height: 100vh;
+            width: 100vw;
+        }
+
+        body {
+            height: 100%;
+            width: 100%;
+        }
+
+        .background {
+            position: absolute;
+        }
+
+        .options {
+            position: fixed;
+            display: inline-block;
+            padding: 10px;
+            overflow: auto;
+            background-color: rgb(56, 56, 56);
+            right: 0;
+            top: 0;
+            margin-right: 10px;
+            color: white;
+        }
+        .options .setting {
+            display: grid;
+            grid-template-columns: 60px 1fr;
+            margin-top: 10px;
+        }
+
+        .back-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            aspect-ratio: 1/1;
+            background-color: rgb(44, 98, 168);
+            color: white;
+            border: 1px solid rgb(0, 43, 124);
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas class="background"></canvas>
+    <div class="options">
+        <h4>Options</h4>
+        <div class="setting">
+            <p>pos-y</p>
+            <input type="range" id="pos-y" min="-100" max="100"/>
+        </div>
+        <div class="setting">
+            <p>speed</p>
+            <input type="range" id="speed" min="1" max="100" value="1"/>
+        </div>
+        <div class="setting">
+            <p>fill-alpha</p>
+            <input type="range" id="alpha" min="1" max="1000" value="0.1"/>
+        </div>
+    </div>
+    <a href="/sample-projects" class="back-button"><</a>
+
+    <script>
+        const canvas = document.querySelector(".background");
+        const c = canvas.getContext("2d");
+
+        const posSlider = document.querySelector("#pos-y");
+        const speedSlider = document.querySelector("#speed");
+        const alphaSlider = document.querySelector("#alpha");
+
+        function resizeCanvas() {
+            canvas.height = innerHeight;
+            canvas.width = innerWidth;
+            posSlider.min = -canvas.height/2;
+            posSlider.max = canvas.height/2;
+        }
+
+        resizeCanvas();
+
+        const canvasInfo = {
+            a: 0.01,
+            b: 100,
+            c:0,
+            d:0,
+            colorH:0,
+            speed:1/10000,
+            alpha:0.1
+        };
+
+        addEventListener("resize", () => {
+            resizeCanvas();
+        })
+
+        let times = 0
+        function animate(){
+            requestAnimationFrame(animate);
+            c.fillStyle = `rgb(0,0,0,${canvasInfo.alpha})`;
+            c.shadowBlur = 0;
+            c.fillRect(0,0,canvas.width,canvas.height);
+
+
+            c.beginPath();
+            c.strokeStyle = `hsl(${canvasInfo["colorH"]},50%,50%)`;
+            c.shadowColor = c.strokeStyle;
+            c.shadowBlur = 30;
+            c.moveTo(0, canvas.height/2 + Math.sin(0 * canvasInfo["a"] + canvasInfo["d"]) * canvasInfo["b"] + canvasInfo["c"]);
+            for (let i = 0; i <= canvas.width; i++) {
+                c.lineTo(i,canvas.height/2 + Math.sin(i * canvasInfo["a"] + canvasInfo["d"]) * canvasInfo["b"] + canvasInfo["c"]);
+            }
+
+            c.stroke();
+            canvasInfo["d"] += 0.03;
+            canvasInfo["colorH"] = Math.abs(Math.sin(times/500)*255);
+            canvasInfo["a"] = (Math.sin(times/500)*255 * canvasInfo["speed"]) + canvasInfo["speed"];
+            times ++;
+        }
+
+        animate();
+
+        let changingPos = false;
+
+        posSlider.addEventListener("mousedown",()=>{
+            changingPos = true;
+        })
+        posSlider.addEventListener("touchstart",()=>{
+            changingPos = true;
+        })
+        posSlider.addEventListener("mouseup",()=>{
+            changingPos = false;
+        })
+        posSlider.addEventListener("touchend",()=>{
+            changingPos = false;
+        })
+
+        function setPos(){
+            setTimeout(setPos,1/60);
+            if(changingPos){
+                canvasInfo["c"] = parseFloat(posSlider.value);
+            }
+        }
+        setPos();
+
+        let changingSpeed = false;
+
+        speedSlider.addEventListener("mousedown",()=>{
+            changingSpeed = true;
+        })
+        speedSlider.addEventListener("touchstart",()=>{
+            changingSpeed = true;
+        })
+        speedSlider.addEventListener("mouseup",()=>{
+            changingSpeed = false;
+        })
+        speedSlider.addEventListener("touchend",()=>{
+            changingSpeed = false;
+        })
+
+        function setSpeed(){
+            setTimeout(setSpeed,1/60);
+            if(changingSpeed){
+                canvasInfo["speed"] = parseFloat(speedSlider.value)/10000;
+            }
+        }
+        setSpeed();
+
+        let changingAlpha = false;
+
+        alphaSlider.addEventListener("mousedown",()=>{
+            changingAlpha = true;
+        })
+        alphaSlider.addEventListener("touchstart",()=>{
+            changingAlpha = true;
+        })
+        alphaSlider.addEventListener("mouseup",()=>{
+            changingAlpha = false;
+        })
+        alphaSlider.addEventListener("touchend",()=>{
+            changingAlpha = false;
+        })
+
+        function setAlpha(){
+            setTimeout(setAlpha,1/60);
+            if(changingAlpha){
+                canvasInfo["alpha"] = parseFloat(alphaSlider.value)/1000;
+            }
+        }
+        setAlpha();
+    </script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sample projects</title>
+    <style>
+        :root {
+            --bright-cyan: rgb(54, 118, 238);
+            --dark-cyan: rgb(46, 99, 197);
+            --darker-cyan: rgb(34, 75, 151);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        .background-canvas {
+            position: fixed;
+            z-index: -5;
+            left: -10vw;
+            top: -10vh;
+            width: 120vw;
+            height: 120vh;
+            object-fit: cover;
+        }
+
+        header {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            height: fit-content;
+            padding: 5px 10px;
+            background-color: rgba(0, 0, 0, 0.658);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.658);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .title {
+            color: white;
+            text-decoration: underline;
+            text-decoration-color: var(--bright-cyan);
+        }
+
+        .back-button {
+            background-color: white;
+            padding: 5px 10px;
+            border-radius: 50vh;
+            font-size: 15px;
+            text-decoration: none;
+            color: var(--bright-cyan);
+            transition: transform ease-in-out .14s;
+        }
+
+        .back-button:hover {
+            transform: scale(110%);
+        }
+
+        .projects-list {
+            display: grid;
+            flex: 1;
+            grid-template-columns: 1fr 1fr 1fr;
+            padding: 10px;
+            column-gap: 10px;
+            row-gap: 10px;
+            margin-top: 50px;
+        }
+
+        @media (max-width: 760px) {
+            .projects-list {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .projects-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .project-clicky {
+            background-color: rgba(0, 0, 0, 0.637);
+            min-height: 200px;
+            height: fit-content;
+            border: 1px solid var(--bright-cyan);
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            transition: box-shadow ease-in-out .14s, transform ease-in-out .14s;
+        }
+
+        .project-clicky:hover {
+            box-shadow: 0 0 10px rgba(54, 118, 238, 0.534);
+            transform: scale(102%);
+        }
+
+        .project-preview-image {
+            height: 100px;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        .project-clicky-info {
+            color: white;
+            direction: rtl;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .project-clicky-info-title {
+            font-size: 20px;
+            background-color: var(--bright-cyan);
+            padding: 3px 5px;
+        }
+
+        .project-clicky-info-description {
+            padding: 5px;
+        }
+    </style>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <canvas class="background-canvas"></canvas>
+    <header>
+        <a href="/" class="back-button">بازگشت</a>
+        <h1 class="title">نمونه پروژه ها</h1>
+    </header>
+    <section class="projects-list"></section>
+
+    <!-- this script is used to handle the sample projects recieve -->
+    <script> 
+        const socket = io();
+        const list = document.querySelector(".projects-list");
+
+        socket.on("connect", ()=>{
+            socket.emit("send-sample-projects", sample_projects_recieved);
+        });
+
+        function sample_projects_recieved(projects) {
+            projects.forEach(project => {
+                const clicky = document.createElement("a");
+                clicky.classList.add("project-clicky");
+                clicky.href = project.link;
+                clicky.innerHTML = `
+                    <img src="${project.image_link}" alt="" class="project-preview-image">
+                    <div class="project-clicky-info">
+                        <h1 class="project-clicky-info-title">${project.title}</h1>
+                        <p class="project-clicky-info-description">${project.description}</p>
+                    </div>
+                `;
+                list.appendChild(clicky);
+            });
+        }
+    </script>
+    <!-- this script is used to handle the canvas background -->
+    <script>
+        const canvas = document.querySelector(".background-canvas");
+        const c = canvas.getContext("2d");
+        
+        function resizing() {
+            canvas.width = innerWidth;
+            canvas.height = innerHeight;
+
+            c.fillStyle = "rgba(0,0,0,1)";
+            c.fillRect(0,0,canvas.width, canvas.height);
+        } resizing();
+
+        window.addEventListener("resize", resizing);
+
+        const line_height = canvas.height/2;
+
+        const time_const = 200;
+        const sin_const = 0.005;
+        function draw_lines(time) {
+            c.beginPath();
+            c.strokeStyle = "rgb(53, 118, 237)";
+
+            // drawing line C
+            c.beginPath();
+            c.moveTo(0,canvas.height - line_height + Math.sin(time*sin_const)*time_const);
+            for (let y = 1; y <= canvas.width; y++) {
+                c.lineTo(y,canvas.height - line_height + Math.sin((time + y)*sin_const)*time_const)
+            }
+            c.stroke();
+
+            c.beginPath();
+            c.moveTo(0,canvas.height - line_height + Math.sin(time*sin_const +320)*time_const);
+            for (let y = 1; y <= canvas.width; y++) {
+                c.lineTo(y,canvas.height - line_height + Math.sin((time + y + 320)*sin_const)*time_const)
+            }
+            c.stroke();
+        }
+
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 1.3;
+
+            draw_lines(time);
+
+            c.fillStyle = "rgba(0,0,0,0.1)";
+            c.fillRect(0,0,canvas.width, canvas.height);
+        } animate();
+    </script>
+</body>
+</html>

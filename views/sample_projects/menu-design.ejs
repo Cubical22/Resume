@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>menu-design sample project</title>
+    <style>
+        :root {
+            --c-main: rgb(9, 91, 158);
+            --c-main-dark: rgb(9, 59, 105);
+            --c-main-mark: rgba(24, 140, 248, 0.295);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 60px;
+        }
+
+        body {
+            min-width: 100vw;
+            min-height: 100vh;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .web-name {
+            font-size: 20px;
+            color: var(--c-main);
+            font-family:Georgia, 'Times New Roman', Times, serif;
+        }
+
+        .task-bar {
+            width: fit-content;
+        }
+
+        .upper-task-bar {
+            display: flex;
+            column-gap: 15px;
+            margin-right: -10px;
+        }
+
+        .upper-shortcuts {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color .14s ease-in-out;
+        }
+
+        .upper-shortcuts:hover {
+            color: var(--c-main);
+        }
+
+        .vertical-line {
+            width: calc(100% + 60px);
+            height: 1px;
+            background-color: rgb(192, 192, 192);
+            margin-top: 10px;
+            margin-bottom: 10px;
+            margin-left: -50px;
+        }
+        
+        .lower-task-bar {
+            margin-top: 15px;
+            margin-left: -40px;
+            display: flex;
+            column-gap: 35px;
+        }
+
+        .contact-button {
+            background-color: var(--c-main-dark);
+            padding: 5px 10px;
+            margin-top: -5px;
+            color: white;
+            text-decoration: none;
+            border-radius: 50vh;
+            transition: all .14s ease-in-out;
+        }
+
+        .contact-button:hover {
+            background-color: transparent;
+            color: var(--c-main-dark);
+        }
+
+        section {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            padding-right: 30px;
+        }
+
+        .left-side-holder {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .right-side-holder {
+            width: 400px;
+        }
+
+        .right-side-holder svg {
+            width: 95%;
+            height: 95%;
+            object-fit: contain;
+            border-radius: 30px;
+            animation: crystal-move 3s ease-in-out both infinite alternate;
+        }
+
+        @keyframes crystal-move {
+            0% {
+                transform: translateY(0%);
+            }
+
+            100% {
+                transform: translateY(3%);
+            }
+        }
+
+        .main-sentence-holder {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .inks-by {
+            height: 100px;
+        }
+
+        .water-mark {
+            position: absolute;
+            font-size: 200px;
+            font-weight: lighter;
+            z-index: -1;
+            color: var(--c-main-mark);
+            font-variant-numeric: diagonal-fractions;
+            margin-right: -50px;
+        }
+
+        .main-sentence {
+            font-size: 50px;
+            font-weight: lighter;
+        }
+
+        .inks-by {
+            display: flex;
+            width: fit-content;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: space-evenly;
+            row-gap: 20px;
+            padding-bottom: 30px;
+        }
+
+        .inks-by-holder {
+            display: flex;
+            align-items: center;
+            justify-content: space-evenly;
+            column-gap: 50px;
+            padding-left: 20px;
+        }
+
+        .inks-by-holder p {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .arrow {
+            position: absolute;
+            right: -20px;
+            font-size: 20px;
+            color: var(--c-main-dark);
+            transition: right .14s ease-in-out, color .14s ease-in-out;
+        }
+
+        .inks-by-holder p:hover .arrow {
+            right: -15px;
+            color: var(--c-main);
+        }
+
+        @media (max-width: 450px) {
+            .lower-task-bar {
+                margin-left: 0;
+            }
+
+            .upper-task-bar {
+                margin-right: 0;
+            }
+        }
+
+        @media (max-width: 840px) {
+            .right-side-holder {
+                display: none;
+            }
+        }
+
+        @media (max-width: 690px) {
+            header {
+                flex-direction: column;
+                row-gap: 40px;
+            }
+
+            .task-bar {
+                margin-right: -30px;
+            }
+
+            .task-bar a {
+                white-space: nowrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="web-name">Blue Crystals</h1>
+        <div class="task-bar">
+            <div class="upper-task-bar">
+                <a href="" class="upper-shortcuts">About</a>
+                <a href="" class="upper-shortcuts">The Crystals Tank</a>
+                <a href="" class="upper-shortcuts">Crystal Answers</a>
+                <a href="" class="upper-shortcuts">News-room</a>
+            </div>
+            <div class="vertical-line"></div>
+            <div class="lower-task-bar">
+                <a href="/sample-projects" class="upper-shortcuts">BACK</a>
+                <a href="" class="upper-shortcuts">Services</a>
+                <a href="" class="upper-shortcuts">Distributors</a>
+                <a href="" class="contact-button">Contact Us</a>
+            </div>
+        </div>
+    </header>
+    <section>
+        <div class="left-side-holder">
+            <div class="main-sentence-holder">
+                <h1 class="main-sentence">Where<br>Impossible Isn't.</h1>
+                <p class="water-mark">KAO</p>
+            </div>
+            <div class="inks-by">
+                <p>CRYSTALS BY:</p>
+                <div class="inks-by-holder">
+                    <p>Application <span class="arrow">></span></p>
+                    <p>Technology <span class="arrow">></span></p>
+                    <p>Printhead <span class="arrow">></span></p>
+                </div>
+            </div>
+        </div>
+        <div class="right-side-holder">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 230.29 260.57"><defs><style>.cls-1{fill:#0071bc;}.cls-2{fill:#2e3192;}.cls-3{fill:#29abe2;}</style></defs><g id="Layer_2" data-name="Layer 2"><polygon class="cls-1" points="76.29 0 0 128.57 114 260.57 168 107.14 76.29 0"/><polygon class="cls-2" points="195.43 68.86 96.57 162.57 118.86 260.57 230.29 184.86 195.43 68.86"/><polygon class="cls-3" points="166.11 114.86 218.29 187.43 168.72 260.57 134.29 187.71 166.11 114.86"/></g></svg>
+        </div>
+    </section>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ADMIN PAGE (PAS)</title>
+  <style>
+    :root {
+      --c-main: #27af8c;
+      --c-mainG: #006550;
+    }
+
+    * {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+      font-family: fantasy, Helvetica;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    header {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(270deg, var(--c-main), var(--c-mainG));
+      padding: 10px;
+    }
+
+    header h1 {
+      direction: rtl;
+      color: white;
+    }
+
+    header a {
+      color: var(--c-main);
+      background: white;
+      padding: 6px 10px;
+      border-radius: 5px;
+    }
+
+    section {
+      padding: 10px;
+      border: 1px solid black;
+      margin: 10px;
+      border-radius: 10px;
+      position: relative;
+    }
+
+    section h3 {
+      direction: rtl;
+      margin-bottom: 10px;
+      font-weight: lighter;
+    }
+
+    .texts-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      width: 100%;
+      height: fit-content;
+      row-gap: 10px;
+      column-gap: 10px;
+    }
+
+    .text-share-div {
+      background: var(--c-main);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+    }
+
+    .text-share-div button {
+      height: 130%;
+      aspect-ratio: 1/1;
+    }
+
+    section .receive-button {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      padding: 3px;
+    }
+  </style>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <p class="password-hidden hidden"><%= code %></p>
+  <header>
+    <a href="/">بازگشت</a>
+    <h1>پنل مدیریت</h1>
+  </header>
+  <section class="text-share-section">
+    <h3>متن های آپلود شده</h3>
+    <button onclick="receiveTextShareContent()" class="text-share-receive-button receive-button">دریافت</button>
+    <div class="texts-list"></div>
+  </section>
+  <section class="requests-section">
+    <h3>درخواست ها</h3>
+    <button onclick="receiveRequests()" class="requests-receive-button receive-button">دریافت</button>
+    <div class="requests-list"></div>
+  </section>
+
+  <script defer>
+    const socket = io();
+    let can_emit_text_share = false;
+    const text_share_list = document.querySelector(".texts-list");
+    const requests_list = document.querySelector(".requests-list")
+    const password = document.querySelector(".password-hidden").textContent;
+
+    const text_elements = [];
+    const req_elements = [];
+
+    socket.on("connect", ()=>{
+      can_emit_text_share = true;
+    });
+
+    function receiveTextShareContent() {
+      socket.emit('send-text-share-text-list', (list)=> {
+        addTextsToList(list);
+      });
+    }
+
+    function addTextsToList(list) {
+      text_elements.forEach(element => {
+        element.remove();
+      });
+      list.forEach(li => {
+        const div = document.createElement("div");
+        div.innerHTML = `<p>${li}</p> <button onclick="removeText('${li}')">X</button>`;
+        div.classList.add("text-share-div");
+        text_share_list.appendChild(div);
+        text_elements.push(div);
+      });
+      if (list.length === 0) {
+        const div = document.createElement("div");
+        div.textContent = "empty ¯\\_(ツ)_/¯"
+        text_share_list.appendChild(div);
+        text_elements.push(div);
+      }
+    }
+
+    function removeText(text) {
+      socket.emit("remove-text-share-item", text, password, (new_text_list) => {
+        addTextsToList(new_text_list);
+      });
+    }
+
+    function receiveRequests() {
+      socket.emit("send-requests-list", password,(list)=>{
+        addRequestsText(list)
+      });
+    }
+
+    function addRequestsText(list) {
+      if (list.length === 0) {
+        const div = document.createElement("div");
+        div.textContent = "empty ¯\\_(ツ)_/¯"
+        requests_list.appendChild(div);
+        req_elements.push(div);
+      } else if (req_elements.length !== 0) {
+        for (let i = req_elements.length-1; i >= 0; i--) {
+          req_elements[i].remove();
+          req_elements.splice(i, 1);
+        }
+        console.log(req_elements);
+      }
+      list.forEach(request => {
+        const div = document.createElement("div");
+        div.classList.add("request");
+
+        const h1 = document.createElement("h1");
+        h1.innerText = request.name;
+        div.appendChild(h1)
+
+        const p1 = document.createElement("p");
+        p1.innerText = request.phone_number;
+        div.appendChild(p1);
+
+        const p2 = document.createElement("p");
+        p2.innerText = request.description;
+        div.appendChild(p2);
+
+        const button = document.createElement("button");
+        button.textContent = "X";
+        button.addEventListener("click", ()=>{
+          removeRequest(div, request);
+        });
+        div.appendChild(button);
+        requests_list.appendChild(div);
+        req_elements.push(div);
+      })
+    }
+
+    function removeRequest(div, req) {
+      socket.emit("remove-request", password, req, ()=>{
+        for (let i = 0; i < req_elements.length; i++) {
+          if (req_elements[i] === div) {
+            req_elements.splice(i,1);
+          }
+        }
+        div.remove();
+      });
+    }
+  </script>
+</body>
+</html>

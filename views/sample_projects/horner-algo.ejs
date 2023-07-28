@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>horner algorythm</title>
+    <style>
+        * {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: white;
+            cursor: default;
+            user-select: none;
+        }
+
+        body {
+            background-color: rgb(27, 27, 27);
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #inputsHolder {
+            background-color: rgb(15, 15, 15);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 200px;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        p {
+            text-align: center;
+            margin: 10px 0;
+            user-select: none;
+            direction: rtl;
+        }
+
+        input {
+            width: 85%;
+            margin: 0 auto;
+            padding-left: 5px;
+            padding-right: 5px;
+            background-color: rgb(53, 53, 53);
+            border: none;
+            outline: none;
+            height: 30px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            cursor: text;
+        }
+
+        input:focus {
+            background-color: rgb(73, 73, 73);
+        }
+
+        button, a {
+            background-color: rgb(59, 59, 255);
+            height: 30px;
+            width: 40%;
+            margin: 0 auto;
+            border: none;
+            outline: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        button:hover {
+            background-color: rgb(86, 86, 250);
+        }
+
+        .sentenceInputHolder {
+            min-height: 400px;
+            width: 90%;
+            margin: 0 auto;
+            background-color: rgb(51, 51, 172);
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            border-radius: 8px;
+            flex: 1;
+        }
+
+        .sentenceHolder {
+            background-color: rgb(86, 86, 182);
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+        }
+
+        #deviderSentenceInputHolder {
+            width: 90%;
+            height: 40px;
+            margin: 0 auto;
+            border-radius: 8px;
+            background-color: rgb(51, 51, 172);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+        }
+
+        .options-button, .back-button {
+            position: fixed;
+            width: 30px;
+            height: 30px;
+            right: 10px;
+        }
+
+        .options-button {
+            top: 10px;
+        }
+
+        .back-button {
+            bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="inputsHolder">
+        <p>جمله ی اصلی {عدد سمت راست توان و عدد سمت چپ ضریب x میباشد} (لطفا یک توان را دوبار استفاده نکنید, در این صورت تنها دومی درج میشود)</p>
+        <button id="addMainButton" style="margin-bottom: 10px;">add</button>
+        <div class="sentenceInputHolder" id="mainSentenceInputHolder"></div>
+        <p>جمله ی تقسیم <br> (xa + b)</p>
+        <div id="deviderSentenceInputHolder">
+            <label for="deviderTime"></label><input type="text" placeholder="a" id="deviderTime">
+            <p style="margin: 0 5px;">x +</p>
+            <label for="deviderPlus"></label><input type="text" placeholder="b" id="deviderPlus">
+        </div>
+        <button id="runButton" style="margin-top: 10px; margin-bottom: 10px;">RUN</button>
+        <p>the asnwer is <br><span id="answerHolderSpan">-</span></p>
+    </div>
+    <button class="options-button">+</button>
+    <a href="/sample-projects" class="back-button"><</a>
+    <canvas id="mainCanvas"></canvas>
+    
+    <!--the visualizer script-->
+    <script>
+        let xValue = undefined;
+        class Chart {
+            constructor(rowCount, x, y, chartData) {
+                this.rowCount = rowCount;
+                this.alpha = 0;
+                this.x = x;
+                this.y = y;
+                this.lineAlpha = 0;
+                this.values = chartData;
+            }
+        
+            draw(c) {
+                var size = [mainCanvas.clientWidth - 2, mainCanvas.height * (2/3)];
+                c.strokeStyle = `rgba(255,255,255,${this.alpha})`
+        
+                c.beginPath();
+                c.rect(this.x, this.y, size[0], size[1]);
+                c.stroke();
+                c.closePath();
+        
+                //draw the line (vertical)
+                c.beginPath();
+                c.moveTo(0, size[1]/2);
+                c.lineTo(size[0], size[1]/2);
+                c.stroke();
+                c.closePath();
+        
+                var distance = size[0]/this.rowCount;
+                c.strokeStyle = `rgba(255,255,255,${this.lineAlpha})`
+                for (let i = 0; i < this.rowCount-1; i++) {
+                    c.beginPath();
+                    c.moveTo(distance*(i+1),0);
+                    c.lineTo(distance*(i+1),size[1]);
+                    c.stroke();
+                    c.closePath();
+                }
+            }
+        }
+        
+        class FormingLetter {
+            // a class that is used in order to creat the numbers fading in
+            // after the last letter is formed, then the procces of answering begins
+            constructor(x, y, text, isCordinate = false) {
+                this.x = x;
+                this.y = y;
+                this.alpha = 0;
+                this.text = text;
+                this.isCordinate = isCordinate;
+            }
+        
+            draw(c) {
+                if (!this.isCordinate) {
+                    var x = mainCanvas.width/chart.values[0].length * this.x + 3;
+                    var y = mainCanvas.height * (2/3)/2 * (this.y + 1);
+                    y -= mainCanvas.height * (2/3)/4;
+                    x += (mainCanvas.width/chart.values[0].length)/2;
+                } else {
+                    var x = this.x;
+                    var y = this.y;
+                }
+                
+                c.beginPath();
+                c.fillStyle = `rgba(255,255,255,${this.alpha})`;
+                c.font = '30px Arial'; //TODO: make the text be more adaptive
+                c.fillText(this.text,x - this.text.length*10, y);
+                c.closePath();
+        
+                this.alpha += 0.1;
+            }
+        }
+        
+        let chart = undefined;
+        const c = mainCanvas.getContext('2d');
+        
+        let numbersAdded = false;
+        let formingNumbers = [];
+        function animate() {
+            requestAnimationFrame(animate);
+            c.fillStyle = 'rgba(30,30,30,0.3)';
+            c.fillRect(0,0,mainCanvas.width,mainCanvas.height);
+            if (chart != undefined) {
+                chart.draw(c);
+                if (chart.alpha <= 1)
+                chart.alpha += 0.02;
+                if (chart.alpha >= 1 && chart.lineAlpha <= 1) 
+                chart.lineAlpha += 0.02
+            } else {return;}
+            if (chart.lineAlpha >= 1 && !numbersAdded) {
+                //start adding the numbers
+                numbersAdded = true;
+                addNumbers();
+                console.log('asdad');
+            }
+            for (let i = 0; i < formingNumbers.length; i++) {
+                formingNumbers[i].draw(c); //fix the text not showing up on the screen;
+            }
+        }
+        
+        let indexOfRow = 0;
+        let secondCol = false;
+        let doneAddingNumbers = false;
+        function addNumbers() {
+            if (doneAddingNumbers) {
+                formingNumbers.push(new FormingLetter(mainCanvas.height * (1/3) - 20, 
+                mainCanvas.height * (2/3) + mainCanvas.height * (1/3)/2 + 10,`x = ${xValue}`, true));
+                console.log(formingNumbers[formingNumbers.length-1]);
+        
+                addTheAnswers();
+        
+                return; //add the other number systems to show other systems as well
+            };
+            setTimeout(addNumbers, 1000/chart.values[0].length);
+            var text = JSON.stringify(chart.values[secondCol ? 1 : 0][indexOfRow]);
+            formingNumbers.push(new FormingLetter(indexOfRow,secondCol ? 1 : 0,text));
+        
+            indexOfRow += 1;
+            if (indexOfRow >= chart.values[0].length) {
+                if (secondCol) {
+                    doneAddingNumbers = true;
+                    console.log('done');
+                } else {
+                    secondCol = true;
+                    indexOfRow = 0;
+                }
+            }
+        }
+        
+        animate();
+        
+        function drawChartFirst(rowCount,chartData,x) {
+            chart = new Chart(rowCount, 1, 1, chartData);
+            xValue = x;
+        }
+        
+        const answerHolderSpan = document.getElementById('answerHolderSpan');
+        
+        function addTheAnswers() {
+            setTimeout(()=>{
+                var x = mainCanvas.height * (1/3) + mainCanvas.width/2;
+                var y = mainCanvas.height * (2/3) + mainCanvas.height * (1/3)/2 + 10;
+                formingNumbers.push(new FormingLetter(x,y,JSON.stringify(chart.values[1][chart.values[1].length-1]),true));
+            },700);
+            setTimeout(()=>{
+                //get the text
+                var text = getTextFromChart();
+                answerHolderSpan.innerHTML = text;
+            },1500) //add the asnwer
+        }
+        
+        function getTextFromChart() {
+            var xPower = chart.values[1].length - 1;
+            var text = '';
+            var textList = [];
+            for (let i = 0; i < chart.values[1].length-1; i++) {
+                xPower--;
+                if (chart.values[1][i] == 0) continue;
+                var tempoText = '';
+                if (chart.values[1][i] != 1 || xPower == 0)
+                    tempoText += `(${chart.values[1][i]})`;
+                if (xPower != 1 && xPower != 0) {
+                    tempoText += `x^${xPower}`
+                } else if (xPower == 1){
+                    tempoText += 'x';
+                }
+                textList.push(tempoText);
+            }
+            for (let i = 0; i < textList.length; i++) {
+                text += `${textList[i]} `;
+                if (i != textList.length - 1) text += ' + ';
+            }
+            return text;
+        }
+    </script>
+
+    <!--the controlls script-->
+    <script>
+        const mainSentenceAddButton = document.getElementById('addMainButton');
+        const mainSentenceHolder = document.getElementById('mainSentenceInputHolder');
+
+
+        mainSentenceAddButton.addEventListener('click',()=>{
+            //add the input values
+            var holder = document.createElement('div');
+            holder.classList.add('sentenceHolder');
+
+            //add the controllers
+            holder.innerHTML = `
+            <input type='text' style='flex:2;' id='times' placeholder='time' value='1'>
+            <p style='display: inline-block; flex: 1;'>X</p>
+            <input type='text' style='flex:2;' id='powers' placeholder='power' value='1'>
+            <button style='height: 30px; aspect-ratio: 1/1; width: 30px; margin-left: 5px;' onclick='removeSelf(this)'>x</button>
+            `
+
+            mainSentenceHolder.appendChild(holder);
+            updadeMainUsedLists();
+        });
+
+        function updadeMainUsedLists() {
+            mainSentence = [];
+            var list = [];
+            var times = document.querySelectorAll('#times');
+            var powers = document.querySelectorAll('#powers');
+            for (let i = 0; i < times.length; i++) {
+                list.push(times[i]);
+                list.push(powers[i]);
+                mainSentence.push(list);
+                list = [];
+            }
+        }
+
+        function removeSelf(self) {
+            mainSentenceHolder.removeChild(self.parentNode);
+            updadeMainUsedLists();
+        }
+
+        const deviderTimeFeild = document.getElementById('deviderTime')
+        deviderTimeFeild.addEventListener('change',(e)=>{
+            deviderTime = deviderTimeFeild.value;
+        });
+        const deviderPlusFeild = document.getElementById('deviderPlus')
+        deviderPlusFeild.addEventListener('change',(e)=>{
+            deviderPlus = deviderPlusFeild.value;
+        });
+    </script>
+
+    <!--the alorythm script-->
+    <script>
+        function getValueOfVariable(plus, times) {
+            return (-plus)/times;
+        }
+
+        function sortThePowerValuesWithTimes(sentence) {
+            var powers = [];
+            for (let i = 0; i < sentence.length; i++) {
+                powers.push(JSON.parse(sentence[i][1].value));
+            }
+            powers = powers.sort(function(a,b) {
+                return (+a) - (+b);
+            });
+            powers = powers.reverse();
+            // sort the entire sentence
+            var times = [];
+            for (let i = 0; i < sentence.length; i++) {
+                times.push(JSON.parse(sentence[i][0].value));
+            }
+            var newSentence = [];
+            for (let i = 0; i < powers.length; i++) {
+                for (let j = 0; j < sentence.length; j++) {
+                    if (powers[i] == JSON.parse(sentence[j][1].value)) {
+                        newSentence.push([
+                            times[j], powers[i]
+                        ]);
+                    }
+                }
+            }
+            return newSentence;
+        }
+
+        function makeTheChartByValues(sentence) {
+            var rowCount = sentence[0][1] + 1
+            var chart = [Array(rowCount),Array(rowCount)];
+            for (let i = rowCount - 1; i >= 0; i--) {
+                for (let j = 0; j < sentence.length; j++) {
+                    if (sentence[j][1] == i) {
+                        chart[0][i] = sentence[j][0];
+                    } else {
+                        if (chart[0][i] == undefined) {
+                            chart[0][i] = 0;
+                        }
+                    }
+                }
+            }
+            return chart;
+        }
+
+        function evaTheChartValues(x, chart) {
+            chart[0] = chart[0].reverse();
+            chart[1][0] = chart[0][0];
+
+            for (let  i = 1; i < chart[1].length; i++) {
+                var newValue = x * chart[1][i-1] + chart[0][i];
+                chart[1][i] = newValue;
+            }
+
+            return chart
+        }
+    </script>
+
+    <!--the main.js script-->
+    <script>
+        const mainCanvas = document.getElementById('mainCanvas');
+
+        let mainSentence = [];
+        let deviderTime = '1';
+        let deviderPlus = '0';
+
+        function resize() {
+            mainCanvas.height = innerHeight;
+            mainCanvas.width = innerWidth;
+            alert_horizontal();
+        }
+        resize();
+
+        function alert_horizontal() {
+            if (innerWidth < innerHeight) {
+                alert(`note: this web page looks better if you hold you phone horizontaly
+        you could run into diffrent display problems including over flowing`);
+            }
+        } alert_horizontal();
+
+
+        addEventListener('resize',resize);
+
+        const runButton = document.getElementById('runButton');
+        runButton.addEventListener('click',()=>{
+            updadeMainUsedLists();
+            numbersAdded = false;
+            formingNumbers = [];
+            indexOfRow = 0;
+            secondCol = false;
+            doneAddingNumbers = false;
+            c.fillStyle = 'rgba(30,30,30,1)';
+            c.fillRect(0,0,mainCanvas.width,mainCanvas.height);
+
+            //1. get the real value for the x variable
+            var x = getValueOfVariable(deviderPlus,deviderTime);
+
+            //2. make the power values in order
+            var sentence = sortThePowerValuesWithTimes(mainSentence);
+            var chartArray = makeTheChartByValues(sentence);
+
+            //3. evaluate all chart's empty values
+            chartArray = evaTheChartValues(x, chartArray);
+
+            //visualizer part
+            //draw the chart
+            drawChartFirst(chartArray[0].length,chartArray,x);
+        });
+
+        const options_list = document.getElementById("inputsHolder");
+        let is_options_on = false;
+        document.querySelector(".options-button").addEventListener("click", ()=>{
+            is_options_on = !is_options_on;
+            if (is_options_on) 
+                options_list.style.display = "flex";
+            else 
+                options_list.style.display = "none";
+        });
+    </script>
+</body>
+</html>
