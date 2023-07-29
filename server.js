@@ -77,6 +77,10 @@ app.get("/", (req,res)=>{
     res.render("main.ejs");
 });
 
+app.get("/en", (req,res)=>{
+    res.render("en/main.ejs");
+});
+
 app.get("/sample-projects",(req,res)=>{
     res.render("sample-projects.ejs");
 });
