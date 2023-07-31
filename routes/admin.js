@@ -6,7 +6,7 @@ router.get("/", (req,res)=>{
 });
 
 router.get("/:id", async (req,res)=> {
-   if (req.params.id === await fs.readFile("./.env", {encoding: "utf-8"})) {
+   if (req.params.id === await fs.readFile("./info.env", {encoding: "utf-8"})) {
       res.render("admin-page.ejs", {code: req.params.id});
    } else {
       res.render("log-page.ejs", {msg: "access denied. please don't try to enter the admin panel if you are not the admin. (WRONG ADMIN CODE). check for misspells and upper cases (case sensitivity)."});

@@ -22,6 +22,7 @@ router.get("/svg/:id", (req,res)=>{
 });
 
 router.get("/assets/:id", (req,res)=>{
+    console.log("requested");
     res.download("./src/assets/"+req.params.id);
 })
 

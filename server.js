@@ -40,7 +40,7 @@ io.on("connect", (socket)=>{
     });
 
     socket.on("remove-text-share-item", async (text,password,callback)=>{
-        if (password === await fs.readFile(".env", {encoding: "utf-8"})) {
+        if (password === await fs.readFile("info.env", {encoding: "utf-8"})) {
             console.log("user identified as admin");
             const list = await text_share_texts_holder.fetchList();
             list.splice(list.indexOf(text),1);
@@ -51,14 +51,14 @@ io.on("connect", (socket)=>{
     });
 
     socket.on("send-requests-list", async (password, callback) => {
-        if (password === await fs.readFile(".env", {encoding: "utf-8"})) {
+        if (password === await fs.readFile("info.env", {encoding: "utf-8"})) {
             const list = JSON.parse(await fs.readFile("./saves/requests_list.txt", {encoding: "utf-8"}));
             callback(list);
         }
     });
 
     socket.on("remove-request", async (password, req, callback)=>{
-        if (password === await fs.readFile(".env", {encoding: "utf-8"})) {
+        if (password === await fs.readFile("info.env", {encoding: "utf-8"})) {
             const list = JSON.parse(await fs.readFile("./saves/requests_list.txt", {encoding: "utf-8"}));
             for (let i = 0; i < list.length; i++) {
                 if (req.index === list[i].index) {
