@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>bootstrap try</title>
+    <link rel="stylesheet" href="/libraries/bootstrap.min.css">
+    <script src="/libraries/js_bootstrap.bundle.min.js" defer></script>
+    <style>
+        @font-face {
+            font-family: "Victor";
+            font-weight: 100;
+            src: url("/assets/VictorMono-Light.ttf");
+        }
+    </style>
+</head>
+<body class="bg-dark" style="font-family: 'Victor', monospace">
+<div class="container" style="padding-top: 10px;">
+    <div class="alert alert-success alert-dismissible" role="alert">
+        welcome to this page, want to go back? <a href="/sample-projects">back</a>
+        <button class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-2">
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3>here is a card on a BS grid looking great</h3>
+                </div>
+                <div class="card-body">
+                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit
+                        . A adipisci consectetur cupiditate, dignissimos distinc
+                        tio dolore fuga hic nihil, pariatur perspiciatis ratione
+                        reprehenderit sunt voluptates! Assumenda in magni reicien
+                        dis unde voluptatum.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3>cards are pretty cool if you think about it</h3>
+                </div>
+                <div class="card-body">
+                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit
+                        . A adipisci consectetur cupiditate, dignissimos distinc
+                        tio dolore fuga hic nihil, pariatur perspiciatis ratione
+                        reprehenderit sunt voluptates! Assumenda in magni reicien
+                        dis unde voluptatum.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3>you can place anything in a card</h3>
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center" style="padding: 0">
+                    <table class="table table-hover table-bordered" style="cursor: default">
+                        <thead>
+                        <tr>
+                            <th>name</th>
+                            <th>age</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <th>Amir</th>
+                            <th>17</th>
+                        </tr>
+                        <tr>
+                            <th>Ali</th>
+                            <th>14</th>
+                        </tr>
+                        <tr>
+                            <th>Reza</th>
+                            <th>20</th>
+                        </tr>
+                        <tr>
+                            <th>Mike</th>
+                            <th>23</th>
+                        </tr>
+                        <tr>
+                            <th>Neda</th>
+                            <th>18</th>
+                        </tr>
+                        <tr>
+                            <th>Kate</th>
+                            <th>17</th>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3>There are other things you can place in cards:</h3>
+                </div>
+                <div class="card-body d-flex flex-column justify-content-evenly gap-2">
+                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit
+                        . A adipisci consectetur cupiditate!</p>
+                    <div class="form-floating">
+                        <input type="text" class="form-control form-control" autocomplete="none" id="floating-text" placeholder="this is a floating text input">
+                        <label for="floating-text">Email</label>
+                    </div>
+                    <div class="input-group input-group-sm w-100">
+                        <label for="money" class="input-group-text bg-dark" style="color: white">$</label>
+                        <input type="number" class="form-control bg-dark" style="color: white" id="money">
+                    </div>
+                    <div class="input-group w-100">
+                        <button class="btn btn-outline-primary"
+                                onclick="alert('I mean, what are you looking for?!')"
+                        >press</button>
+
+                        <input type="text" id="test-massage" class="form-control">
+                        <label for="test-massage"></label>
+
+                        <button class="btn btn-primary"
+                                onclick="confirm('you said: ' + document.getElementById('test-massage').value)"
+                        >try</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3>You can even play forms inside a card</h3>
+                </div>
+                <div class="card-body">
+                    <form novalidate class="deco-form">
+                        <div class="alert alert-warning alert-dismissible fs-6" id="alert" role="alert">
+                            this is not a real form, I promise :)
+                            <button class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        <Label for="rate" class="fs-3">Want to rate?<br><span class="fs-6">select one!</span></Label>
+                        <select id="rate" class="form-select" style="margin: 10px 0">
+                            <option value="great">great 🧡</option>
+                            <option value="rather_good">rather good 😅</option>
+                            <option value="boring">boring 😪</option>
+                            <option value="hate">hated it 😫</option>
+                            <option value="whatever">whatever 🙄</option>
+                        </select>
+                        <div class="input-group" style="margin-bottom: 10px">
+                            <label for="email" class="input-group-text">@:</label>
+                            <input type="email" id="email" class="form-control" placeholder="email" required>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-outline-primary">send</button>
+                            <button type="button" class="btn btn-outline-secondary"
+                                    onclick="alert('this is just a test button to show how to use a button group')"
+                            >test
+                            </button>
+                        </div>
+                    </form>
+                    <script>
+                        const form = document.querySelector(".deco-form");
+
+                        form.addEventListener("submit", (e) => {
+                            e.preventDefault();
+                            alert('this button is just for decoration ' +
+                                '(the form isn\'t react actually, it\'s just for decoration)');
+                            form.classList.add("was-validated")
+                        });
+                    </script>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3>You can place images inside a card</h3>
+                </div>
+                <div class="card-body">
+                    <img src="/src/images/card.png" alt="Here is an image" class="w-100 object-fit-cover h-100">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container m-3"></div>
+</body>
+</html>
