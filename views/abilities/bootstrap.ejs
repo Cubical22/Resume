@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>web-design & programming description</title>
+    <style>
+        :root {
+            --bright-cyan: rgb(54, 118, 238);
+            --dark-cyan: rgb(46, 99, 197);
+            --darker-cyan: rgb(34, 75, 151);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            direction: rtl;
+        }
+
+        body {
+            background-color: rgb(12, 12, 12);
+        }
+
+        header {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            height: fit-content;
+            padding: 5px 10px;
+            background-color: rgba(0, 0, 0, 0.658);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.658);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .title {
+            color: white;
+            text-decoration: underline;
+            text-decoration-color: var(--bright-cyan);
+        }
+
+        .back-button {
+            background-color: white;
+            padding: 5px 10px;
+            border-radius: 50vh;
+            font-size: 15px;
+            text-decoration: none;
+            color: var(--bright-cyan);
+            transition: transform ease-in-out .14s;
+        }
+
+        .back-button:hover {
+            transform: scale(110%);
+        }
+
+        .bg {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            z-index: -1;
+        }
+
+        .main-holder {
+            width: 100%;
+            height: fit-content;
+            margin-top: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: space-evenly;
+            padding: 10px;
+            row-gap: 10px;
+        }
+
+        .info-section {
+            height: fit-content;
+            background-color: rgba(0, 0, 0, 0.637);
+            border: 1px solid var(--bright-cyan);
+            transition: box-shadow ease-in-out .14s;
+            cursor: default;
+            width: fit-content;
+            min-width: 250px;
+            max-width: 600px;
+            width: 60vw;
+        }
+
+        .info-section:hover {
+            box-shadow: 0 0 10px rgba(54, 118, 238, 0.534);
+        }
+
+        .info-section .section-title {
+            width: 100%;
+            text-align: end;
+            padding: 5px;
+            background-color: var(--bright-cyan);
+            font-size: 17px;
+        }
+
+        .info-section .section-info {
+            padding: 10px;
+            color: white;
+            direction: rtl;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+<canvas class="bg"></canvas>
+<header>
+    <a href="/" class="back-button">بازگشت</a>
+    <h1 class="title">طراحی و برنامه نویسی وب</h1>
+</header>
+<div class="main-holder"></div>
+
+<!-- this script handles adding the info sections based on the array in the script -->
+<script>
+    const list_element = document.querySelector(".main-holder");
+
+    class Section {
+        constructor(title, info) {
+            this.title = title;
+            this.info = info;
+        }
+    }
+
+    const sections = [
+        new Section(
+            "bootstrap چیست؟",
+            "یکی از بهترین فریم ورک های فرانت اند برای ساخت وبسایت, bootstrap می باشد. bootstrap یک فریم ورک css می باشد, یعنی به ما این اجازه را می دهد که با استفاده از class ها در html, به سرعت استایل های مختلفی را روی صفحه ی خود پیاده کنیم."
+        ),
+        new Section(
+            "چرا از آن استفاده می شود؟",
+            "یکی از مهمترین مضیت های فریم ورک bootstrap, قابلیت ویسپانسیو سازی وبسایت نسبت به اندزه ی صفحه می باشد. فریم ورک bootstrap نود درصد اوقات, ریسپانسیو سازی را به صورت خودکار انجام می دهد, به گونه ای که class های استفاده شده, از قبل آماده و همراه با اطلاعات مورد نیاز نسبت به اندازه ی صفحه می باشند. "
+        ),
+        new Section(
+            "آیا استفاده از این فریم فرک معایبی دارد؟",
+            "تنها عیبی که می توان برای این فریم ورک بیان کرد, افزودن بر حجم فایل ها می باشد. البته که این فریم ورک محدود است, و اول و آخر فرد برنامه نویس, مجبور به استفاده از برنامه نویسی vanilla Html,Css,javascript می شود, اما این فریم ورک سرعت کار را به شدت بالا می برد."
+        ),
+    ];
+
+    sections.forEach(section => {
+        const div = document.createElement("div");
+        div.classList.add("info-section");
+        div.innerHTML = `
+                <h1 class="section-title">${section.title}</h1>
+                <p class="section-info">${section.info}</p>
+            `;
+        list_element.appendChild(div);
+    });
+</script>
+
+<!-- this script handles the canvas in teh bg-->
+<script>
+    const canvas = document.querySelector(".bg");
+    const c = canvas.getContext("2d");
+
+    function resizing() {
+        canvas.width = innerWidth;
+        canvas.height = innerHeight;
+    }
+
+    resizing();
+
+    window.addEventListener("resize", resizing);
+
+    const speed_x = 1;
+    const value_used = 5;
+
+    class Particle {
+        constructor(x, y, sin_offset) {
+            this.x = x;
+            this.y = y;
+            this.sin_offset = sin_offset;
+        }
+
+        update(c) {
+            this.x += speed_x * (Math.random() * value_used + 1);
+            this.y += Math.sin((this.x + this.sin_offset) / value_used / 2) * value_used;
+
+            if (this.x > innerWidth) {
+                this.x = 0;
+            }
+
+            this.draw(c);
+        }
+
+        draw(c) {
+            c.beginPath();
+            c.fillStyle = "rgb(54, 118, 238)";
+            c.arc(this.x, this.y, 3, 0, Math.PI * 2, false);
+            c.fill();
+        }
+    }
+
+    const particles = [];
+    const particle_count = 20;
+
+    function init() {
+        particles.splice(0, particles.length);
+        for (let i = 0; i < particle_count; i++) {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            particles.push(new Particle(x, y, Math.random() * 200));
+        }
+    }
+
+    init();
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        for (let i = 0; i < particles.length; i++) {
+            particles[i].update(c);
+        }
+
+        c.fillStyle = "rgba(0,0,0,0.2)";
+        c.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    animate();
+</script>
+</body>
+</html>
