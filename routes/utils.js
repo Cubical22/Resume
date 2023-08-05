@@ -6,7 +6,8 @@ router.get("/send-massage", (req,res)=>{
 });
 
 router.post("/send", async (req,res)=>{
-   const current_list = JSON.parse(await fs.readFile("./saves/requests_list.txt", {encoding:'utf-8'}));
+   const current_list = JSON.parse(await fs.readFile("./passwordGatedFiles/requests.json",
+       {encoding:'utf-8'})).requests;
 
    let current_index = 0;
    while (true) {
@@ -31,7 +32,7 @@ router.post("/send", async (req,res)=>{
    });
    console.log(current_list);
    try {
-      await fs.writeFile("./saves/requests_list.txt", JSON.stringify(current_list));
+      await fs.writeFile("./passwordGatedFiles/requests.json", JSON.stringify({requests: current_list}));
       res.render("send-massage.ejs", {"error_massage": "💐 درخواست شما با موفقیت ثبت شد 💐 "});
    } catch {
       res.render("send-massage.ejs", {"error_massage": "مشکلی در ارسال پیش اومد"});
