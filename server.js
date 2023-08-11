@@ -25,11 +25,13 @@ app.use("/utils", utils);
 app.use("/assets", assets);
 app.use("/passwordGatedData", passwordGatedData);
 
+/*TODO: make the text-share system be based on fetch requests as well. this is going to make the app be supported
+* on all sorts of browsers
+* without having to worry about slowing down the system
+*
+* how amazing!
+*/
 io.on("connect", (socket)=>{
-    socket.on("send-sample-projects", (callback)=>{
-        callback(sample_projects_holder);
-    });
-
     socket.on("send-text-share-text-list", async (callback)=>{
         callback(await text_share_texts_holder.fetchList());
     });

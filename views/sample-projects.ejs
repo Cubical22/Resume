@@ -142,11 +142,15 @@
         const socket = io();
         const list = document.querySelector(".projects-list");
 
-        socket.on("connect", ()=>{
-            socket.emit("send-sample-projects", sample_projects_recieved);
+        /*socket.on("connect", ()=>{
+            socket.emit("send-sample-projects", sample_projects_received);
+        });*/
+
+        fetch("/sample-projects/request-all").then(txt=>{
+           txt.json().then(js=>sample_projects_received(js));
         });
 
-        function sample_projects_recieved(projects) {
+        function sample_projects_received(projects) {
             projects.forEach(project => {
                 const clicky = document.createElement("a");
                 clicky.classList.add("project-clicky");
