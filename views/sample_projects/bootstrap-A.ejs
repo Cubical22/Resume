@@ -183,7 +183,128 @@
             </div>
         </div>
     </div>
+    <div class="p-1"></div>
+    <div class="card-group">
+        <div class="card">
+            <div class="card-header bg-primary-subtle"><h3 style="text-align: end">this card</h3></div>
+            <div class="card-body">
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquid commodi error excepturi facilis id ipsam labore laborum, nulla odio pariatur porro quisquam sapiente sint sit suscipit unde ut vero voluptatum!</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header bg-warning-subtle"><h3>that card</h3></div>
+            <div class="card-body">
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. A debitis dignissimos enim error excepturi iure labore, nam nemo, nihil reiciendis unde veritatis. Amet, dolorem iste nihil non quae recusandae tenetur!</p>
+            </div>
+        </div>
+    </div>
 </div>
-<div class="container m-3"></div>
+
+<div class="p-1"></div>
+
+<!-- this container is used to create and add a modal -->
+<div class="container">
+    <div class="alert alert-success d-flex flex-column gap-2" role="alert">
+        you can use modals in Bootstrap :) ->
+        <div class="btn-group" style="max-width: 600px">
+            <button class="btn btn-outline-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modal">scroll modal</button>
+            <button class="btn btn-outline-secondary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalB">center modal</button>
+            <button class="btn btn-outline-danger"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalC">fullscreen modal</button>
+        </div>
+    </div>
+    <div class="modal fade" id="modal">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header"><h3>this is a test modal</h3>
+                    <button class="btn-close" data-bs-dismiss="modal" data-bs-target="#modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><span>Lorem ipsum dolor si
+                        t amet, consectetur adipisicing elit. Dolores exercitatio
+                        nem fugit inventore iure nesciunt quidem! Asperiores assumenda culpa ea eaque fugit illo laboriosam nemo temporibus voluptas voluptatem. Eligendi, numquam ratione.</span><span>Consectetur
+                        earum eveniet expedita, harum in quis
+                        quam reprehenderit! Aliquid autem esse, in magni minima modi molestiae non, nulla officia perspiciatis quae quam ratione reiciendis reprehenderit sequi suscipit ut veniam voluptate.</span><span>Atque aut dolorem, doloribus eius eveniet illum in minus, nesciunt quasi repellat tempora ullam ut voluptatem? Delectus deleniti dignissimos, eligendi et explicabo magnam nostrum odit officia quaerat quasi, ullam veritatis.</span><span>Cupiditate dolore ex fugiat obcaecati. A adipisci amet consequatur consequuntur debitis deleniti, dignissimos facere inventore laboriosam natus odit quibusdam recusandae sint totam unde. Beatae enim mollitia, nemo obcaecati perferendis quam?</span><span>Ad alias aperiam, aspernatur, commodi debitis, delectus dolor dolorum ea error exercitationem id illo in iusto minima nemo neque nobis numquam odio praesentium quae recusandae similique sunt tempore temporibus vitae?</span><span>Omnis, porro quo! Ab alias, blanditiis cumque deserunt dignissimos esse explicabo illum, laboriosam nam nostrum pariatur quo suscipit voluptatibus! Aliquam aperiam aut cum excepturi fuga laboriosam libero maxime necessitatibus odit!</span><span>Aliquam animi commodi consequuntur magnam maiores odio quod voluptates! Blanditiis, deserunt eligendi esse eveniet incidunt iste neque quia ratione sed vitae? Accusamus animi aperiam ducimus hic illo quis sit voluptas!</span><span>Adipisci, blanditiis consequuntur dicta dolore ea earum exercitationem expedita fuga itaque laborum nostrum omnis optio quaerat quidem, quis quos repudiandae sint unde, velit voluptatum. Debitis eius exercitationem recusandae sint tenetur.</span><span>Architecto autem beatae commodi consectetur debitis delectus dolor dolore dolorum earum expedita harum ipsum laudantium libero molestiae odit, quaerat quam quasi recusandae, rem saepe sapiente similique sit, sunt. Atque, voluptatum!</span><span>Adipisci aliquid animi beatae consequatur deleniti dicta, doloremque, ducimus, enim excepturi magni nam necessitatibus nesciunt nihil nisi odit pariatur praesentium quae quaerat quas ratione ullam ut vel voluptatibus? Dolorum, saepe!</span></p>
+                </div>
+                <div class="modal-footer justify-content-center">footer here</div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modalB">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header"><h3>this is a test modal</h3></div>
+                <div class="modal-body">
+                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci aliquam assumenda beatae dicta enim eos explicabo facere hic neque vero? Aliquid asperiores deserunt dolores in ipsum provident quae quia quos!</p>
+                </div>
+                <div class="modal-footer justify-content-center gap-2">footer here
+                    <button class="btn btn-outline-danger" data-bs-dismiss="modal" data-bs-target="#modalB">close</button></div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modalC">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header"><h3>this is a test modal</h3></div>
+                <div class="modal-body">
+                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci aliquam assumenda beatae dicta enim eos explicabo facere hic neque vero? Aliquid asperiores deserunt dolores in ipsum provident quae quia quos!</p>
+                </div>
+                <div class="modal-footer justify-content-center gap-2">footer here
+                    <button class="btn btn-outline-danger" data-bs-dismiss="modal" data-bs-target="#modalC">close</button></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="p-1"></div>
+
+<div class="container">
+    <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <h3>expand/collapse</h3>
+            <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse"
+                    aria-expanded="false" aria-controls="collapse">></button>
+        </div>
+        <div class="card-body collapse" id="collapse">
+            <div class="row gy-2">
+                <div class="col-12 col-lg">
+                    <div>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet culpa cumque distinctio dolores
+                        ducimus eaque eveniet excepturi fugit impedit ipsam molestias mollitia, natus obcaecati quaerat
+                        repellendus sint, sit tenetur totam!
+                    </div>
+                    <div>Alias amet at consequuntur, doloribus excepturi ipsa obcaecati officiis quidem repellat sit vel
+                        voluptatem. Culpa dignissimos hic minus natus nesciunt. Debitis obcaecati, quaerat? Accusamus
+                        earum laborum nostrum, pariatur provident rem?
+                    </div>
+                    <div>Cum dolorum inventore maiores molestiae, reiciendis sequi suscipit. Consequatur deserunt
+                        dignissimos doloremque, ducimus est facere facilis in magnam odit officiis, optio quam quibusdam
+                        quidem quis quo quos sint ullam voluptate.
+                    </div>
+                    <div>Alias atque consequatur eligendi est, eum ex exercitationem harum maiores necessitatibus
+                        pariatur quaerat similique, totam unde! Aliquam at expedita molestiae mollitia nesciunt officia
+                        placeat quia sapiente, sed voluptatibus? Est, molestiae.
+                    </div>
+                </div>
+                <div class="col">
+                    <img src="/src/images/card.png" alt="this is a sample image" class="w-100 h-100 object-fit-cover">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="p-2"></div>
+
+<nav class="navbar navbar-expand bg-white">
+    <div class="container">
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aspernatur, at blanditiis cupiditate dignissimos ex expedita inventore laudantium modi obcaecati quae quaerat quas quis repellat sunt suscipit tempora vel voluptate voluptatem?
+    </div>
+</nav>
+<!--<div class="container m-3"></div>-->
 </body>
 </html>
