@@ -1,21 +1,27 @@
 {
-  "name": "resume",
+  "name": "server",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "this is my first GitHub repository, made rather late into production sadly ;( I uploaded the following project so that anyone can access the sample projects I uploaded locally.",
+  "main": "server.js",
   "scripts": {
-    "devStart": "nodemon server.js",
-    "start": "node server.js"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
-  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cubical22/Resume.git"
+  },
   "author": "",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Cubical22/Resume/issues"
+  },
+  "homepage": "https://github.com/Cubical22/Resume#readme",
   "dependencies": {
     "ejs": "^3.1.9",
     "express": "^4.18.2",
-    "socket.io": "^4.5.4"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.22"
+    "nodemon": "^3.0.1",
+    "socket.io": "^4.7.2"
   }
 }
