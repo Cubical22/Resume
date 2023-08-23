@@ -38,6 +38,12 @@ const projects = [
         "/sample-projects/bootstrap-A.ejs"
     ),
     new Project(
+        "طراحی منوی ورودی رستوران",
+        "این وبسایت برای نمایش قدرت javascript در حل مشکلات متعدد و ایجاد reactive-ness در وبسایت ساخته شده است. منو به طور کد نویسی شده آماده شده و تصاویر با کدنویسی تغییر می کنند.",
+        "/src/sample-project-thumbnails/restaurant-menu-design.png",
+        "/sample-projects/restaurant-menu-design.ejs"
+    ),
+    new Project(
         "طراحی منوی ورودی کریستال آبی",
         "این وبسیات برای نمایش قدرت HTML و CSS در طراحی یک وب ساخته شده است. چیدمان وبسایت با استفاده از تکنیک های گوناگون ساخته شده که با توجه به سایز صفحه تغییر می کند.",
         "/src/sample-project-thumbnails/menu-design.png",

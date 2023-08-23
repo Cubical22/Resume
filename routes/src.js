@@ -9,6 +9,10 @@ router.get("/sample-project-thumbnails/:id", (req,res)=>{
     res.download("./images/sample-projects/"+req.params.id);
 });
 
+router.get("/restaurant/:id", (req,res)=>{
+    res.download("./images/restaurant/" + req.params.id);
+})
+
 router.get("/js/:id", (req,res)=>{
    res.download("./src/js/"+req.params.id);
 });
