@@ -96,12 +96,17 @@
             display: flex;
             flex-direction: column;
             text-decoration: none;
-            transition: box-shadow ease-in-out .14s, transform ease-in-out .14s;
+            transition: box-shadow ease-in-out .14s, transform ease-in-out .14s,
+                backdrop-filter ease-in-out .14s;
+
+            backdrop-filter: blur(5px);
         }
 
         .project-clicky:hover {
             box-shadow: 0 0 10px rgba(54, 118, 238, 0.534);
             transform: scale(102%);
+
+            backdrop-filter: blur(10px);
         }
 
         .project-preview-image {
