@@ -27,4 +27,4 @@ is a mess. There are several different routes the user can access:
 ## Note:
 the project is also uploaded on the web
 here is the full address:
-https://amo-resume.chbk.run
+https://amo-resume.chbk.run (currently out of order >_< )
